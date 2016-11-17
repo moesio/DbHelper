@@ -43,30 +43,49 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 	}
 
 	public boolean create(Entity entity) {
-		SQLiteDatabase database = DatabaseUtil.openForRead(context);
-		ContentValues values = entityHandler.createContentValues(entity);
-		long id = database.insert(entityHandler.getTableName(), null, values);
-		database.close();
+		SQLiteDatabase database = null;
+		long id = 0;
+		try {
+			database = DatabaseUtil.openForRead(context);
+			ContentValues values = entityHandler.createContentValues(entity);
+			id = database.insert(entityHandler.getTableName(), null, values);
+		} catch (Exception e) {
+			Log.e(Application.getName(context), "Error while creating " + entityClass.getSimpleName());
+			throw e;
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
 		return id != 0;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Entity retrieve(Object id) {
-		SQLiteDatabase database = DatabaseUtil.openForRead(context);
+		SQLiteDatabase database = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
-		Cursor cursor;
 		try {
-			Field idField = Reflection.getIdField(entityClass);
-			String idValue = Filter.getStringValue(id);
-			String idFieldName = idField.getName();
-			cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
-			list = entityHandler.extract(cursor);
+			database = DatabaseUtil.openForRead(context);
+			Cursor cursor;
+			try {
+				Field idField = Reflection.getIdField(entityClass);
+				String idValue = Filter.getStringValue(id);
+				String idFieldName = idField.getName();
+				cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
+				list = entityHandler.extract(cursor);
+			} catch (Exception e) {
+				Log.e(Application.getName(context), "Error while retrieving.");
+				Log.e(Application.getName(context), e.getMessage());
+				Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+			}
 		} catch (Exception e) {
-			Log.e(Application.getName(context), "Error while retrieving.");
-			Log.e(Application.getName(context), e.getMessage());
-			Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+			Log.e(Application.getName(context), "Error while retriving " + entityClass.getSimpleName());
+			throw e;
+		} finally {
+			if (database != null) {
+				database.close();
+			}
 		}
-		database.close();
 		try {
 			return (Entity) list.get(0);
 		} catch (IndexOutOfBoundsException e) {
@@ -80,42 +99,66 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 
 	@SuppressWarnings("unchecked")
 	public List<Entity> filter(Filter... filters) {
-		SQLiteDatabase database = DatabaseUtil.openForRead(context);
-		Cursor cursor;
+		SQLiteDatabase database = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
-			FilterManager filterManager = new FilterManager(filters);
-			String orderBy = filterManager.getOrderBy();
-			cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getSelection(), filterManager.getArgs(), null, null, orderBy);
-			list = entityHandler.extract(cursor);
+			database = DatabaseUtil.openForRead(context);
+			Cursor cursor;
+			try {
+				FilterManager filterManager = new FilterManager(filters);
+				String orderBy = filterManager.getOrderBy();
+				cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getSelection(), filterManager.getArgs(), null, null, orderBy);
+				list = entityHandler.extract(cursor);
+			} catch (Exception e) {
+				Log.e(Application.getName(context), "Error in filter");
+				Log.e(Application.getName(context), e.getMessage());
+				Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+			}
 		} catch (Exception e) {
-			Log.e(Application.getName(context), "Error in filter");
-			Log.e(Application.getName(context), e.getMessage());
-			Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+			Log.e(Application.getName(context), "Error while filtering " + entityClass.getSimpleName());
+			throw e;
+		} finally {
+			if (database != null) {
+				database.close();
+			}
 		}
-		database.close();
 		return (List<Entity>) list;
 	}
 
 	public boolean update(Entity entity) {
-		SQLiteDatabase database = DatabaseUtil.openForWrite(context);
-		ContentValues values = entityHandler.createContentValues(entity);
+		SQLiteDatabase database = null;
 		try {
+			database = DatabaseUtil.openForWrite(context);
+			ContentValues values = entityHandler.createContentValues(entity);
 			Field idField = Reflection.getIdField(entityClass);
 			Method method = entityClass.getMethod(Reflection.getGetter(idField));
 			int affectedRows = database.update(entityHandler.getTableName(), values, "id = ?", new String[] { method.invoke(entity).toString() });
 			return affectedRows != 0;
 		} catch (Exception e) {
+			Log.e(Application.getName(context), "Error while updating " + entityClass.getSimpleName());
 			return false;
 		} finally {
-			database.close();
+			if (database != null) {
+				database.close();
+			}
 		}
 	}
 
 	public boolean delete(Object id) {
-		SQLiteDatabase database = DatabaseUtil.openForWrite(context);
-		int affectedRows = database.delete(entityHandler.getTableName(), "id = ?", new String[] { id.toString() });
-		database.close();
+		SQLiteDatabase database = null;
+		int affectedRows = 0;
+		try {
+			database = DatabaseUtil.openForWrite(context);
+			affectedRows = database.delete(entityHandler.getTableName(), "id = ?", new String[] { id.toString() });
+			database.close();
+		} catch (Exception e) {
+			Log.e(Application.getName(context), "Error while deleting " + entityClass.getSimpleName());
+			throw e;
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
 		return affectedRows > 0;
 	}
 
