@@ -69,6 +69,8 @@ public class EntityHandler {
 					values.put(databaseFieldName, Filter.getStringValue(invoke));
 				} else if (field.getType() == Double.class) {
 					values.put(databaseFieldName, (Double) invoke);
+				} else if (field.getType() == Long.class) {
+					values.put(databaseFieldName, (Long) invoke);
 				} else {
 					values.put(databaseFieldName, (String) invoke);
 				}
@@ -121,6 +123,8 @@ public class EntityHandler {
 					method.invoke(entity, date);
 				} else if (type == Double.class) {
 					method.invoke(entity, cursor.getDouble(cursor.getColumnIndex(columnName)));
+				} else if (type == Long.class) {
+					method.invoke(entity, cursor.getLong(cursor.getColumnIndex(columnName)));
 				} else {
 					// TODO Test deep associations more than one level, ie, nested association
 					
