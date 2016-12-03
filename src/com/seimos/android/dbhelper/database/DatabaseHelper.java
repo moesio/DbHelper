@@ -8,30 +8,44 @@ import com.seimos.android.dbhelper.util.Application;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-	private String[] createDbQueries;
+	private Patch[] patches;
 
-	public DatabaseHelper(Context context, String databaseName, String[] createDbQueries) {
+	public DatabaseHelper(Context context, String databaseName, Patch[] patches) {
 		super(context, databaseName, null, Application.getVersion(context));
-		this.createDbQueries = createDbQueries;
+		this.patches = patches;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		for (String sql : createDbQueries) {
-			db.execSQL(sql);
+		for (Patch patch : patches) {
+			patch.apply(db);
 		}
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO
-		//		String[] versions = context.getResources().getStringArray(upgradeSqlStringArray);
-		//		for (int i = oldVersion; i < newVersion; i++) {
-		//			String[] statements = versions[i - 1].split(";");
-		//			for (String statement : statements) {
-		//				db.execSQL(statement);
-		//			}
-		//		}
+		for (int i = oldVersion; i < newVersion; i++) {
+			patches[i].apply(db);
+		}
 	}
 
+	/**
+	 * @author moesio @ gmail.com
+	 * @date Dec 3, 2016 9:42:47 AM
+	 */
+	public static class Patch {
+
+		private String[] queries;
+
+		public Patch(String[] queries) {
+			this.queries = queries;
+		}
+
+		public void apply(SQLiteDatabase db) {
+			for (String query : queries) {
+				db.execSQL(query);
+			}
+		}
+
+	}
 }
