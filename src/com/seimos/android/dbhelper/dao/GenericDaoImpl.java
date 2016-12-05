@@ -31,10 +31,6 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 	private Class<Entity> entityClass;
 	private EntityHandler entityHandler;
 
-	@SuppressWarnings("unused")
-	private GenericDaoImpl() {
-	}
-
 	@SuppressWarnings("unchecked")
 	public GenericDaoImpl(Context context) {
 		this.context = context;

@@ -61,6 +61,8 @@ public class EntityHandler {
 				if (Reflection.isEntity(invoke)) {
 					Field idField = Reflection.getIdField(field.getType());
 					values.put(databaseFieldName, (Integer) Reflection.invoke(invoke, idField.getName()));
+				} else if (field.getType() == Enum.class) {
+					throw new RuntimeException();
 				} else if (field.getType() == Integer.class) {
 					values.put(databaseFieldName, (Integer) invoke);
 				} else if (field.getType() == Boolean.class) {

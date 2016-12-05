@@ -17,7 +17,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		for (Patch patch : patches) {
+		Patch patch = patches[0];
+		if (patch != null) {
 			patch.apply(db);
 		}
 	}
@@ -25,24 +26,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		for (int i = oldVersion; i < newVersion; i++) {
-			patches[i].apply(db);
+			Patch patch = patches[i];
+			if (patch != null) {
+				patch.apply(db);
+			}
+		}
+	}
+
+	@Override
+	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		for (int i = newVersion - 1; i >= oldVersion; i--) {
+			Patch patch = patches[i];
+			if (patch != null) {
+				patch.revert(db);
+			}
 		}
 	}
 
 	/**
 	 * @author moesio @ gmail.com
 	 * @date Dec 3, 2016 9:42:47 AM
+	 * 
+	 * http://www.greenmoonsoftware.com/2012/02/sqlite-schema-migration-in-android/
+	 * 
 	 */
 	public static class Patch {
 
-		private String[] queries;
+		private String[] forwardQueries;
+		private String[] rewindQueries;
 
-		public Patch(String[] queries) {
-			this.queries = queries;
+		public Patch(String[] forwardQueries, String[] rewindQueries) {
+			this.forwardQueries = forwardQueries;
+			this.rewindQueries = rewindQueries;
 		}
 
 		public void apply(SQLiteDatabase db) {
-			for (String query : queries) {
+			for (String query : forwardQueries) {
+				db.execSQL(query);
+			}
+		}
+
+		public void revert(SQLiteDatabase db) {
+			for (String query : rewindQueries) {
 				db.execSQL(query);
 			}
 		}
