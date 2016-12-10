@@ -53,7 +53,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 				database.close();
 			}
 		}
-		return id != 0;
+		return id > 0;
 	}
 
 	@SuppressWarnings("unchecked")
