@@ -3,6 +3,7 @@ package com.seimos.android.dbhelper.database;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.seimos.android.dbhelper.exception.InvalidModifierException;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**
@@ -28,11 +30,10 @@ public class EntityHandler {
 	private Class<? extends BaseEntity> entityClass;
 	private Context context;
 
-	@SuppressWarnings("unused")
-	private EntityHandler() {
-	}
-
 	public EntityHandler(Context context, Class<? extends BaseEntity> entityClass) {
+		if (context == null || entityClass == null) {
+			throw new NullPointerException("Neither parameter context nor entity class can be null");
+		}
 		this.context = context;
 		this.entityClass = entityClass;
 	}
@@ -42,48 +43,54 @@ public class EntityHandler {
 	}
 
 	public String[] getColumns() {
-		Field[] fields = entityClass.getDeclaredFields();
+		Field[] fields = Reflection.getInnerDeclaredFields(entityClass);
 		String[] columns = new String[fields.length];
 		for (int i = 0; i < fields.length; i++) {
+			//			columns[i] = toDatabaseName(fields[i].getName());
+			if (Modifier.isFinal(fields[i].getModifiers())) {
+				throw new InvalidModifierException(entityClass, fields[i]);
+			}
 			columns[i] = toDatabaseName(fields[i].getName());
 		}
 		return columns;
 	}
 
 	public ContentValues createContentValues(BaseEntity entity) {
-		ContentValues values = new ContentValues();
+		ContentValues contentValues = new ContentValues();
 
-		Field[] declaredFields = entity.getClass().getDeclaredFields();
+		Field[] declaredFields = Reflection.getInnerDeclaredFields(entity.getClass());
 		for (Field field : declaredFields) {
-			Object invoke = Reflection.invoke(entity, field.getName());
+			Object value = Reflection.getValue(entity, field.getName());
 			String databaseFieldName = toDatabaseName(field.getName());
-			if (invoke != null) {
-				if (Reflection.isEntity(invoke)) {
+			if (value != null) {
+				if (Reflection.isEntity(value)) {
 					Field idField = Reflection.getIdField(field.getType());
-					values.put(databaseFieldName, (Integer) Reflection.invoke(invoke, idField.getName()));
-				} else if (field.getType() == Enum.class) {
-					throw new RuntimeException();
+					try {
+						contentValues.put(databaseFieldName, (Integer) idField.get(value));
+					} catch (IllegalAccessException | IllegalArgumentException e) {
+					}
 				} else if (field.getType() == Integer.class) {
-					values.put(databaseFieldName, (Integer) invoke);
+					contentValues.put(databaseFieldName, (Integer) value);
 				} else if (field.getType() == Boolean.class) {
-					values.put(databaseFieldName, (Boolean) invoke);
+					contentValues.put(databaseFieldName, (Boolean) value);
 				} else if (field.getType() == Date.class) {
-					values.put(databaseFieldName, Filter.getStringValue(invoke));
+					contentValues.put(databaseFieldName, Filter.getStringValue(value));
 				} else if (field.getType() == Double.class) {
-					values.put(databaseFieldName, (Double) invoke);
+					contentValues.put(databaseFieldName, (Double) value);
 				} else if (field.getType() == Long.class) {
-					values.put(databaseFieldName, (Long) invoke);
+					contentValues.put(databaseFieldName, (Long) value);
 				} else {
-					values.put(databaseFieldName, (String) invoke);
+					//					throw new RuntimeException(field.getType() + " not recongnized as field entity.");
+					contentValues.put(databaseFieldName, (String) value);
 				}
 			}
 		}
-		return values;
+		return contentValues;
 	}
 
 	public String toDatabaseName(String name) {
 		Locale locale = new Locale("EN_us");
-		return name.replaceAll("(\\W)", "_$1").toLowerCase(locale);
+		return name.replaceAll("(\\W)", "_").toLowerCase(locale);
 	}
 
 	public List<BaseEntity> extract(final Cursor cursor) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException,
@@ -129,7 +136,7 @@ public class EntityHandler {
 					method.invoke(entity, cursor.getLong(cursor.getColumnIndex(columnName)));
 				} else {
 					// TODO Test deep associations more than one level, ie, nested association
-					
+
 					BaseEntity association = (BaseEntity) type.newInstance();
 					Method methodAssociation = association.getClass().getMethod(Reflection.getSetter(Reflection.getIdField(association.getClass()).getName()), Integer.class);
 					// TODO Verify when id field is not an Integer
@@ -141,7 +148,8 @@ public class EntityHandler {
 					SQLiteDatabase database = DatabaseUtil.openForRead(context);
 					String idFieldName = Reflection.getIdField(field.getType()).getName();
 					// TODO Verify when id field is not an Integer
-					Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue.toString()}, null, null, idFieldName,	"1");
+					Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue.toString() },
+							null, null, idFieldName, "1");
 					if (cursorAssociation.moveToFirst()) {
 						association = entityHandler.createEntityFromCursor(cursorAssociation);
 					}

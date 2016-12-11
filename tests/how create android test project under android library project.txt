@@ -1,0 +1,22 @@
+How did I created a test inside android library itself using eclipse
+--------------------------------------------------------------------
+
+- Create an android test from library
+	- right click on library project root
+	- Android Tools / New Test Project
+	- set name to LibraryTest or something else
+	- uncheck 'use default location'
+	- fill with a folder on library root, whatever
+	- a folder named LibraryTestTest will be created under library root
+- Delete test project keeping its contents, yes delete! (uncheck 'delete project contents on disk')
+- Rename LibraryTestTest to 'tests'
+- Import 'Existing project into workspace' from 'tests'
+- Modify AndroidManifest.xml from LibraryTest
+	- change instrumentation tag, attribute android:targetPackage to 'library.test', i.e., add '.test'
+- Create a new JUnit Test Case
+	- choose JUnit 4, if you want
+	- name a class, e.g., ClassTest
+	- choose AndroidTestCase as superclass
+	- choose which class will be target as test
+- Run ClassTest as Android JUnit Test
+- That's it!
