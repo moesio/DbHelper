@@ -59,17 +59,17 @@ public class Reflection {
 		return invocation;
 	}
 
-	public static boolean isCollection(Class<?> clazz, String attributePath) {
-		try {
-			Field field = clazz.getDeclaredField(attributePath);
-			if (field.getType().isAssignableFrom(List.class)) {
-				return true;
-			}
-		} catch (SecurityException e) {
-		} catch (NoSuchFieldException e) {
-		}
-		return false;
-	}
+//	private static boolean isCollection(Class<?> clazz, String attributePath) {
+//		try {
+//			Field field = clazz.getDeclaredField(attributePath);
+//			if (field.getType().isAssignableFrom(List.class)) {
+//				return true;
+//			}
+//		} catch (SecurityException e) {
+//		} catch (NoSuchFieldException e) {
+//		}
+//		return false;
+//	}
 
 	public static Field getIdField(Class<?> clazz) {
 		Field[] fields = getInnerDeclaredFields(clazz);

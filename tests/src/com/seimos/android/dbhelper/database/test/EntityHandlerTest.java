@@ -14,37 +14,13 @@ import com.seimos.android.dbhelper.database.BaseEntity;
 import com.seimos.android.dbhelper.database.EntityHandler;
 import com.seimos.android.dbhelper.database.Filter;
 import com.seimos.android.dbhelper.exception.InvalidModifierException;
+import com.seimos.android.dbhelper.test.Something;
 
 /**
  * @author moesio @ gmail.com
  * @date Dec 10, 2016 5:34:08 PM
  */
 public class EntityHandlerTest extends AndroidTestCase {
-
-	/**
-		 * @author moesio @ gmail.com
-		 * @date Dec 10, 2016 10:28:13 PM
-		 */
-	public class Something extends BaseEntity {
-
-		private Long id;
-		@SuppressWarnings("unused")
-		private String name;
-		@SuppressWarnings("unused")
-		private Integer integer;
-		@SuppressWarnings("unused")
-		private Boolean bool;
-		@SuppressWarnings("unused")
-		private Date date;
-		@SuppressWarnings("unused")
-		private Double doub;
-
-		@Override
-		public String toString() {
-			return "" + id;
-		}
-
-	}
 
 	private Context context;
 	private EntityHandler entityHandler;
@@ -114,13 +90,13 @@ public class EntityHandlerTest extends AndroidTestCase {
 
 	@Test
 	public final void testCreateContentValues() {
-		something.bool = true;
 		Date now = new Date();
-		something.date = now;
-		something.doub = 2.;
-		something.id = 1L;
-		something.integer = 2;
-		something.name = "Foo";
+		something.setBool(true);
+		something.setDate(now);
+		something.setDoub(2.);
+		something.setId(1L);
+		something.setInteger(2);
+		something.setName("Foo");
 		ContentValues contentValuesExpected = new ContentValues();
 		contentValuesExpected.put("bool", true);
 		contentValuesExpected.put("date", Filter.getStringValue(now));
