@@ -13,10 +13,6 @@ public class FilterManager {
 	private String[] args;
 	private String orderBy;
 
-	@SuppressWarnings("unused")
-	private FilterManager() {
-	}
-
 	public FilterManager(Filter[] filters) {
 		this.filters = filters;
 		split();

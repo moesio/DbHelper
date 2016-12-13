@@ -8,25 +8,20 @@ import com.seimos.android.dbhelper.util.Application;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+	private static DatabaseHelper instance;
+	private static SQLiteDatabase database;
 	private Patch[] patches;
 
 	public DatabaseHelper(Context context, String databaseName, Patch[] patches) {
 		super(context, databaseName, null, Application.getVersion(context));
 		this.patches = patches;
+		DatabaseHelper.instance = this;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		Patch patch = patches[0];
-		if (patch != null) {
-			patch.apply(db);
-		}
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		for (int i = oldVersion; i < newVersion; i++) {
-			Patch patch = patches[i];
+		if (patches != null && patches.length > 0) {
+			Patch patch = patches[0];
 			if (patch != null) {
 				patch.apply(db);
 			}
@@ -34,13 +29,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	@Override
-	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		for (int i = newVersion - 1; i >= oldVersion; i--) {
-			Patch patch = patches[i];
-			if (patch != null) {
-				patch.revert(db);
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if (patches != null && patches.length > 0) {
+			for (int i = oldVersion; i < newVersion; i++) {
+				Patch patch = patches[i];
+				if (patch != null) {
+					patch.apply(db);
+				}
 			}
 		}
+	}
+
+	@Override
+	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if (patches != null && patches.length > 0) {
+			for (int i = newVersion - 1; i >= oldVersion; i--) {
+				Patch patch = patches[i];
+				if (patch != null) {
+					patch.revert(db);
+				}
+			}
+		}
+	}
+
+	public static SQLiteDatabase openForRead(Context context) {
+		if (instance == null) {
+			throw new IllegalArgumentException("Instantiate database with DatabaseUtil.instantiateDb(DatabaseHelper)");
+		}
+		if (database == null || !database.isOpen()) {
+			database = instance.getReadableDatabase();
+		}
+		return database;
+	}
+
+	public static SQLiteDatabase openForWrite(Context context) {
+		if (instance == null) {
+			throw new IllegalArgumentException("Instantiate database with DatabaseUtil.instantiateDb(DatabaseHelper)");
+		}
+		if (database == null || !database.isOpen()) {
+			database = instance.getWritableDatabase();
+		}
+		return database;
 	}
 
 	/**

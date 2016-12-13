@@ -13,10 +13,6 @@ public class OrderBy {
 	private String columnName;
 	private Order order;
 
-	@SuppressWarnings("unused")
-	private OrderBy() {
-	}
-
 	public OrderBy(String columnName) {
 		this.columnName = columnName;
 		this.order = Order.ASC;

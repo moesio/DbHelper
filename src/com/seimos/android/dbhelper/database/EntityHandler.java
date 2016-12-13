@@ -145,7 +145,7 @@ public class EntityHandler {
 
 					@SuppressWarnings("unchecked")
 					EntityHandler entityHandler = new EntityHandler(context, (Class<? extends BaseEntity>) field.getType());
-					SQLiteDatabase database = DatabaseUtil.openForRead(context);
+					SQLiteDatabase database = DatabaseHelper.openForRead(context);
 					String idFieldName = Reflection.getIdField(field.getType()).getName();
 					// TODO Verify when id field is not an Integer
 					Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue.toString() },
