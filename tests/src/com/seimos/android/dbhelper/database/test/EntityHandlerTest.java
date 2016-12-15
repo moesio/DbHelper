@@ -64,24 +64,29 @@ public class EntityHandlerTest extends AndroidTestCase {
 		}
 	}
 
-	//	@Test
-	//	public final void testCreateContentValues_for_an_not_defined_type() {
-	//		BaseEntity baseEntity = new BaseEntity() {
-	//			private Object a;
-	//
-	//			@Override
-	//			public String toString() {
-	//				return null;
-	//			}
-	//		};
-	//
-	//		
-	//		try {
-	//			new EntityHandler(context, baseEntity.getClass()).createContentValues(baseEntity);
-	//			fail("Type not mapped should not be accepted for entities");
-	//		} catch (RuntimeException e) {
-	//		}
-	//	}
+	@Test
+	public final void testCreateContentValues_for_an_not_defined_type() {
+		BaseEntity baseEntity = new BaseEntity() {
+			private Object a;
+
+			@Override
+			public String toString() {
+				return null;
+			}
+		};
+
+		// TODO 
+	}
+
+	@Test
+	public final void testExtract() {
+		// TODO
+	}
+
+	@Test
+	public final void testCreateEntityFromCursor() {
+		// TODO
+	}
 
 	@Test
 	public final void testGetColumns() {

@@ -9,21 +9,22 @@ import com.seimos.android.dbhelper.util.Application;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static DatabaseHelper instance;
-	private static SQLiteDatabase database;
+	private String[] initialQueries;
 	private Patch[] patches;
+	private static SQLiteDatabase database;
 
-	public DatabaseHelper(Context context, String databaseName, Patch[] patches) {
+	public DatabaseHelper(Context context, String databaseName, String[] initialQueries, Patch[] patches) {
 		super(context, databaseName, null, Application.getVersion(context));
+		this.initialQueries = initialQueries;
 		this.patches = patches;
 		DatabaseHelper.instance = this;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		if (patches != null && patches.length > 0) {
-			Patch patch = patches[0];
-			if (patch != null) {
-				patch.apply(db);
+		if (initialQueries != null && initialQueries.length > 0) {
+			for (String query : initialQueries) {
+				db.execSQL(query);
 			}
 		}
 	}
@@ -52,21 +53,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	public static SQLiteDatabase openForRead(Context context) {
+	public static SQLiteDatabase openForRead() {
 		if (instance == null) {
-			throw new IllegalArgumentException("Instantiate database with DatabaseUtil.instantiateDb(DatabaseHelper)");
-		}
-		if (database == null || !database.isOpen()) {
+			throw new IllegalArgumentException("None instance of DatabaseHelper found");
+		} else if (database == null || !database.isOpen()) {
 			database = instance.getReadableDatabase();
 		}
 		return database;
 	}
 
-	public static SQLiteDatabase openForWrite(Context context) {
+	public static SQLiteDatabase openForWrite() {
 		if (instance == null) {
-			throw new IllegalArgumentException("Instantiate database with DatabaseUtil.instantiateDb(DatabaseHelper)");
-		}
-		if (database == null || !database.isOpen()) {
+			throw new IllegalArgumentException("None instance of DatabaseHelper found");
+		} else if (database == null || !database.isOpen()) {
 			database = instance.getWritableDatabase();
 		}
 		return database;

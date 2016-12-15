@@ -25,7 +25,7 @@ import com.seimos.android.dbhelper.util.Reflection;
  * @author moesio @ gmail.com
  * @date Jul 28, 2015 5:47:59 PM
  */
-public abstract class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Entity> {
+public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Entity> {
 
 	private Context context;
 	private Class<Entity> entityClass;
@@ -42,7 +42,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 		SQLiteDatabase database = null;
 		long id = 0;
 		try {
-			database = DatabaseHelper.openForWrite(context);
+			database = DatabaseHelper.openForWrite();
 			ContentValues values = entityHandler.createContentValues(entity);
 			id = database.insert(entityHandler.getTableName(), null, values);
 		} catch (Exception e) {
@@ -61,7 +61,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 		SQLiteDatabase database = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
-			database = DatabaseHelper.openForRead(context);
+			database = DatabaseHelper.openForRead();
 			Cursor cursor;
 			try {
 				Field idField = Reflection.getIdField(entityClass);
@@ -98,7 +98,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 		SQLiteDatabase database = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
-			database = DatabaseHelper.openForRead(context);
+			database = DatabaseHelper.openForRead();
 			Cursor cursor;
 			try {
 				FilterManager filterManager = new FilterManager(filters);
@@ -124,7 +124,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 	public boolean update(Entity entity) {
 		SQLiteDatabase database = null;
 		try {
-			database = DatabaseHelper.openForWrite(context);
+			database = DatabaseHelper.openForWrite();
 			ContentValues values = entityHandler.createContentValues(entity);
 			Field idField = Reflection.getIdField(entityClass);
 			Method method = entityClass.getMethod(Reflection.getGetter(idField));
@@ -144,7 +144,7 @@ public abstract class GenericDaoImpl<Entity extends BaseEntity> implements Gener
 		SQLiteDatabase database = null;
 		int affectedRows = 0;
 		try {
-			database = DatabaseHelper.openForWrite(context);
+			database = DatabaseHelper.openForWrite();
 			affectedRows = database.delete(entityHandler.getTableName(), "id = ?", new String[] { id.toString() });
 			database.close();
 		} catch (Exception e) {
