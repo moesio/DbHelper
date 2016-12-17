@@ -3,9 +3,8 @@ package com.seimos.android.dbhelper.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import com.seimos.android.dbhelper.annotation.Id;
 import com.seimos.android.dbhelper.database.BaseEntity;
@@ -26,18 +25,31 @@ public class Reflection {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.beans.Introspector#decapitalize(java.lang.String)
+	 */
+	private static String capitalize(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		char[] chars = name.toCharArray();
+		if (name.length() > 1 && !(Character.isLowerCase(chars[0]) && Character.isLowerCase(chars[1]))) {
+			return name;
+		}
+		chars[0] = Character.toUpperCase(chars[0]);
+		return new String(chars);
+	}
+
 	public static String getGetter(Field field) {
-		String fieldName = field.getName();
-		String methodName = ((field.getType() == Boolean.TYPE) ? "is" : "get") + fieldName.substring(0, 1).toUpperCase(Locale.US) + fieldName.substring(1);
-		return methodName;
+		return "get" + capitalize(field.getName());
 	}
 
 	public static String getGetter(String property) {
-		return "get" + property.substring(0, 1).toUpperCase(Locale.US) + property.substring(1);
+		return "get" + capitalize(property);
 	}
 
 	public static String getSetter(String property) {
-		return "set" + property.substring(0, 1).toUpperCase(Locale.US) + property.substring(1);
+		return "set" + capitalize(property);
 	}
 
 	public static Object getValue(Object object, String property) {
@@ -59,17 +71,17 @@ public class Reflection {
 		return invocation;
 	}
 
-//	private static boolean isCollection(Class<?> clazz, String attributePath) {
-//		try {
-//			Field field = clazz.getDeclaredField(attributePath);
-//			if (field.getType().isAssignableFrom(List.class)) {
-//				return true;
-//			}
-//		} catch (SecurityException e) {
-//		} catch (NoSuchFieldException e) {
-//		}
-//		return false;
-//	}
+	//	private static boolean isCollection(Class<?> clazz, String attributePath) {
+	//		try {
+	//			Field field = clazz.getDeclaredField(attributePath);
+	//			if (field.getType().isAssignableFrom(List.class)) {
+	//				return true;
+	//			}
+	//		} catch (SecurityException e) {
+	//		} catch (NoSuchFieldException e) {
+	//		}
+	//		return false;
+	//	}
 
 	public static Field getIdField(Class<?> clazz) {
 		Field[] fields = getInnerDeclaredFields(clazz);
@@ -93,14 +105,33 @@ public class Reflection {
 		Field[] fields = clazz.getDeclaredFields();
 		ArrayList<Field> fieldList = new ArrayList<Field>();
 
+		Field field;
 		for (int i = 0; i < fields.length; i++) {
-			if (clazz.getEnclosingClass() != null && fields[i].getType().equals(clazz.getEnclosingClass())) {
+			field = fields[i];
+			if ((clazz.getEnclosingClass() != null && field.getType().equals(clazz.getEnclosingClass())) || Modifier.isFinal(field.getModifiers())) {
 				continue;
 			}
-			fieldList.add(fields[i]);
+			fieldList.add(field);
 		}
 		Field[] ownFields = new Field[fieldList.size()];
 		return fieldList.toArray(ownFields);
 	}
 
+	public static void setValue(Object object, String columnName, Object value) {
+		Class<? extends Object> clazz = object.getClass();
+		try {
+			Method method = clazz.getMethod(getSetter(columnName), value.getClass());
+			method.invoke(object, value);
+		} catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			Field field;
+			try {
+				field = clazz.getDeclaredField(columnName);
+				field.setAccessible(true);
+				field.set(object, value);
+			} catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e1) {
+				throw new IllegalArgumentException("Cannot set value to field " + columnName + " in class " + clazz);
+			}
+		}
+
+	}
 }

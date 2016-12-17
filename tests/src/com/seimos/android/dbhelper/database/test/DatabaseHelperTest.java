@@ -21,12 +21,6 @@ public class DatabaseHelperTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		if (databaseHelper == null) {
-			try {
-				DatabaseHelper.openForRead();
-				fail("DatabaseHelper must be instantiated before call openForRead");
-			} catch (IllegalArgumentException e) {
-			}
-
 			databaseHelper = new DatabaseHelper(getContext(), null, null, null);
 		}
 	}

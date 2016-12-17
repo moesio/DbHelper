@@ -16,10 +16,6 @@ public abstract class GenericManagerImpl<Entity extends BaseEntity, Dao extends 
 
 	public abstract GenericDao<Entity> getDao();
 
-	@SuppressWarnings("unused")
-	private GenericManagerImpl() {
-	}
-
 	public GenericManagerImpl(Context context) {
 	}
 

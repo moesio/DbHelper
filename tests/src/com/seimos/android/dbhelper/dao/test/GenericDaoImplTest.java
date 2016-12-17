@@ -1,14 +1,13 @@
 package com.seimos.android.dbhelper.dao.test;
 
-import org.junit.BeforeClass;
+import java.util.Date;
+
 import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.dao.GenericDaoImpl;
 import com.seimos.android.dbhelper.database.DatabaseHelper;
-import com.seimos.android.dbhelper.database.DatabaseHelper.Patch;
-import com.seimos.android.dbhelper.test.Something;
+import com.seimos.android.dbhelper.database.test.Something;
 
 /**
  * @author moesio @ gmail.com
@@ -16,19 +15,29 @@ import com.seimos.android.dbhelper.test.Something;
  */
 public class GenericDaoImplTest extends AndroidTestCase {
 
-	private GenericDaoImpl<Something> genericDaoImpl;
+	private SomethingDaoImpl dao;
 
-	@BeforeClass
-	public void init() {
-		genericDaoImpl = new GenericDaoImpl<Something>(getContext());
+	public void setUp() {
+		dao = new SomethingDaoImpl(getContext());
+		new DatabaseHelper(getContext(), null, Something.TABLE_CREATION_QUERY, null);
 	}
 
-	@Test
-	public final void testGenericDaoImpl() {
-	}
+	//	Long id;
+	//	String name;
+	//	Integer integer;
+	//	Boolean bool;
+	//	Date date;
+	//	Double doub;
 
 	@Test
 	public final void testCreate() {
+		Something something = new Something().setaBoolean(true).setaDate(new Date()).setaDouble(0.5).setaInteger(2).setName("something");
+		assertTrue(dao.create(something));
+		try {
+			dao.create(null);
+			fail("Must not accept null as argument for create");
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
 	@Test

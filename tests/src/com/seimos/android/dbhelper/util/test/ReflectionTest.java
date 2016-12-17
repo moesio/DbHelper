@@ -9,7 +9,7 @@ import android.test.AndroidTestCase;
 
 import com.seimos.android.dbhelper.annotation.Id;
 import com.seimos.android.dbhelper.database.BaseEntity;
-import com.seimos.android.dbhelper.test.Something;
+import com.seimos.android.dbhelper.database.test.Something;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**
@@ -39,49 +39,49 @@ public class ReflectionTest extends AndroidTestCase {
 	@Test
 	public final void testGetGetterField() {
 		Field[] fields = Reflection.getInnerDeclaredFields(Something.class);
-		assertEquals("getBool", Reflection.getGetter(fields[0]));
-		assertEquals("getDate", Reflection.getGetter(fields[1]));
-		assertEquals("getDoub", Reflection.getGetter(fields[2]));
-		assertEquals("getId", Reflection.getGetter(fields[3]));
-		assertEquals("getInteger", Reflection.getGetter(fields[4]));
+		assertEquals("getaBoolean", Reflection.getGetter(fields[0]));
+		assertEquals("getaDate", Reflection.getGetter(fields[1]));
+		assertEquals("getaDouble", Reflection.getGetter(fields[2]));
+		assertEquals("getaInteger", Reflection.getGetter(fields[3]));
+		assertEquals("getId", Reflection.getGetter(fields[4]));
 		assertEquals("getName", Reflection.getGetter(fields[5]));
 	}
 
 	@Test
 	public final void testGetGetterString() {
-		assertEquals("getBool", Reflection.getGetter("bool"));
-		assertEquals("getDate", Reflection.getGetter("date"));
-		assertEquals("getDoub", Reflection.getGetter("doub"));
+		assertEquals("getaBoolean", Reflection.getGetter("aBoolean"));
+		assertEquals("getaDate", Reflection.getGetter("aDate"));
+		assertEquals("getaDouble", Reflection.getGetter("aDouble"));
+		assertEquals("getaInteger", Reflection.getGetter("aInteger"));
 		assertEquals("getId", Reflection.getGetter("id"));
-		assertEquals("getInteger", Reflection.getGetter("integer"));
 		assertEquals("getName", Reflection.getGetter("name"));
 	}
 
 	@Test
 	public final void testGetSetter() {
-		assertEquals("setBool", Reflection.getSetter("bool"));
-		assertEquals("setDate", Reflection.getSetter("date"));
-		assertEquals("setDoub", Reflection.getSetter("doub"));
+		assertEquals("setaBoolean", Reflection.getSetter("aBoolean"));
+		assertEquals("setaDate", Reflection.getSetter("aDate"));
+		assertEquals("setaDouble", Reflection.getSetter("aDouble"));
+		assertEquals("setaInteger", Reflection.getSetter("aInteger"));
 		assertEquals("setId", Reflection.getSetter("id"));
-		assertEquals("setInteger", Reflection.getSetter("integer"));
 		assertEquals("setName", Reflection.getSetter("name"));
 	}
 
 	@Test
 	public final void testGetValue() {
 		Date now = new Date();
-		something.setBool(true);
-		something.setDate(now);
-		something.setDoub(2.);
+		something.setaBoolean(true);
+		something.setaDate(now);
+		something.setaDouble(2.);
 		something.setId(1L);
-		something.setInteger(2);
+		something.setaInteger(2);
 		something.setName("Foo");
 
-		assertEquals(Boolean.TRUE, Reflection.getValue(something, "bool"));
-		assertEquals(now, Reflection.getValue(something, "date"));
-		assertEquals(2., Reflection.getValue(something, "doub"));
+		assertEquals(Boolean.TRUE, Reflection.getValue(something, "aBoolean"));
+		assertEquals(now, Reflection.getValue(something, "aDate"));
+		assertEquals(2., Reflection.getValue(something, "aDouble"));
 		assertEquals(1L, Reflection.getValue(something, "id"));
-		assertEquals(2, Reflection.getValue(something, "integer"));
+		assertEquals(2, Reflection.getValue(something, "aInteger"));
 		assertEquals("Foo", Reflection.getValue(something, "name"));
 	}
 
@@ -105,9 +105,35 @@ public class ReflectionTest extends AndroidTestCase {
 		}
 	}
 
-//	@Test
-//	public final void testGetInnerDeclaredFields() {
-//		Field[] fields = Reflection.getInnerDeclaredFields(Something.class);
-//	}
+	//	@Test
+	//	public final void testGetInnerDeclaredFields() {
+	//		Field[] fields = Reflection.getInnerDeclaredFields(Something.class);
+	//	}
 
+	@Test
+	public final void testSetValue() {
+		Something something = new Something();
+		try {
+			Reflection.setValue(something, "a", 50);
+			fail("Must not accept an invalid field to set");
+		} catch (IllegalArgumentException e) {
+		}
+		Reflection.setValue(something, "name", "John Doe");
+		assertEquals("John Doe", something.getName());
+		assertNull(something.getaBoolean());
+		
+		class Foo {
+			private String bar;
+
+			public String getBar() {
+				return bar;
+			}
+			
+			
+		}
+		
+		Foo foo = new Foo();
+		Reflection.setValue(foo, "bar", "bar");
+		assertEquals("bar", foo.getBar());
+	}
 }

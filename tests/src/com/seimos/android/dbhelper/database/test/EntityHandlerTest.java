@@ -1,20 +1,24 @@
 package com.seimos.android.dbhelper.database.test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import android.content.ContentValues;
-import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
 import com.seimos.android.dbhelper.database.BaseEntity;
+import com.seimos.android.dbhelper.database.DatabaseHelper;
 import com.seimos.android.dbhelper.database.EntityHandler;
 import com.seimos.android.dbhelper.database.Filter;
 import com.seimos.android.dbhelper.exception.InvalidModifierException;
-import com.seimos.android.dbhelper.test.Something;
 
 /**
  * @author moesio @ gmail.com
@@ -22,28 +26,25 @@ import com.seimos.android.dbhelper.test.Something;
  */
 public class EntityHandlerTest extends AndroidTestCase {
 
-	private Context context;
 	private EntityHandler entityHandler;
-	private Something something;
 
 	@Override
 	protected void setUp() throws Exception {
 		try {
 			new EntityHandler(null, null);
-			fail("Neither context nor entity parameter can be null");
+			fail("Neiar context nor entity parameter can be null");
 		} catch (NullPointerException e) {
 		}
 
-		context = getContext();
-		entityHandler = new EntityHandler(context, Something.class);
-		something = new Something();
+		entityHandler = new EntityHandler(getContext(), Something.class);
+
 	}
 
-	@Test
-	public final void testGetTableName() {
-		assertFalse("Something".equals(entityHandler.getTableName()));
-		assertEquals("something", entityHandler.getTableName());
-	}
+	//	@Test
+	//	public final void testGetTableName() {
+	//		assertFalse("Something".equals(entityHandler.getTableName()));
+	//		assertEquals("something", entityHandler.getTableName());
+	//	}
 
 	@Test
 	public final void testGetColumns_with_final_fields_in_base_entity() throws InvalidModifierException {
@@ -57,17 +58,20 @@ public class EntityHandlerTest extends AndroidTestCase {
 			}
 		};
 
-		try {
-			new EntityHandler(context, baseEntity.getClass()).getColumns();
-			fail("Final fields should not be accepted for entities");
-		} catch (InvalidModifierException e) {
-		}
+		assertEquals(0, new EntityHandler(getContext(), baseEntity.getClass()).getColumns().length);
 	}
 
 	@Test
 	public final void testCreateContentValues_for_an_not_defined_type() {
+		final Object anObject = new Object() {
+			@Override
+			public String toString() {
+				return "anything at all";
+			}
+		};
 		BaseEntity baseEntity = new BaseEntity() {
-			private Object a;
+			@SuppressWarnings("unused")
+			private Object a = anObject;
 
 			@Override
 			public String toString() {
@@ -75,53 +79,92 @@ public class EntityHandlerTest extends AndroidTestCase {
 			}
 		};
 
-		// TODO 
+		ContentValues expectedContentValues = new ContentValues();
+		expectedContentValues.put("a", anObject.toString());
+
+		ContentValues actualCreateContentValues = entityHandler.createContentValues(baseEntity);
+		assertEquals(expectedContentValues, actualCreateContentValues);
+	}
+
+	@Test
+	public final void testCreateEntityFromCursor() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), null, Something.TABLE_CREATION_QUERY, null);
+		SQLiteDatabase db = databaseHelper.getWritableDatabase();
+		Something something = new Something().setaBoolean(true).setaDate(new Date()).setaDouble(0.5).setaInteger(2).setName("something");
+		long insert = db.insert("something", null, entityHandler.createContentValues(something));
+		if (insert != -1) {
+			Cursor cursor = db.query("something", Something.COLUMNS, null, null, null, null, null);
+			cursor.moveToFirst();
+			Something actual = (Something) entityHandler.createEntityFromCursor(cursor);
+			assertEquals(something.getName(), actual.getName());
+		} else {
+			fail("Cannot insert");
+		}
 	}
 
 	@Test
 	public final void testExtract() {
-		// TODO
-	}
-
-	@Test
-	public final void testCreateEntityFromCursor() {
-		// TODO
+		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), null, new String[] { "create table extract (name varchar, flag boolean, value integer);" }, null);
+		SQLiteDatabase db = databaseHelper.getReadableDatabase();
+		db.execSQL("insert into extract values ('John Doe', 'true', 1000)");
+		Cursor cursor = db.query("extract", new String[] { "name", "flag", "value" }, null, null, null, null, null);
+		try {
+			entityHandler.extract(cursor).size();
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | NoSuchMethodException  e) {
+		}
+		
+		
 	}
 
 	@Test
 	public final void testGetColumns() {
-		assertTrue(Arrays.equals(new String[] { "bool", "date", "doub", "id", "integer", "name" }, entityHandler.getColumns()));
+		Arrays.sort(Something.COLUMNS);
+		assertTrue(Arrays.equals(Something.COLUMNS, entityHandler.getColumns()));
 	}
 
 	@Test
 	public final void testCreateContentValues() {
 		Date now = new Date();
-		something.setBool(true);
-		something.setDate(now);
-		something.setDoub(2.);
+		Something something = new Something();
+		something.setaBoolean(true);
+		something.setaDate(now);
+		something.setaDouble(2.);
 		something.setId(1L);
-		something.setInteger(2);
+		something.setaInteger(2);
 		something.setName("Foo");
-		ContentValues contentValuesExpected = new ContentValues();
-		contentValuesExpected.put("bool", true);
-		contentValuesExpected.put("date", Filter.getStringValue(now));
-		contentValuesExpected.put("doub", 2.);
-		contentValuesExpected.put("id", 1L);
-		contentValuesExpected.put("integer", 2);
-		contentValuesExpected.put("name", "Foo");
-		ContentValues contentValuesActual = entityHandler.createContentValues(something);
-		assertEquals(contentValuesExpected, contentValuesActual);
+		ContentValues expectedContentValues = new ContentValues();
+		expectedContentValues.put("aBoolean", true);
+		expectedContentValues.put("aDate", Filter.getStringValue(now));
+		expectedContentValues.put("aDouble", 2.);
+		expectedContentValues.put("id", 1L);
+		expectedContentValues.put("aInteger", 2);
+		expectedContentValues.put("name", "Foo");
+		ContentValues actualContentValues = entityHandler.createContentValues(something);
+		Set<String> keySet = expectedContentValues.keySet();
+		for (Iterator<String> iterator = keySet.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			assertTrue(actualContentValues.containsKey(key));
+			assertEquals(expectedContentValues.get(key), actualContentValues.get(key));
+			iterator.remove();
+		}
+		assertEquals(0, keySet.size());
+		//		assertEquals(expectedContentValues, actualContentValues);
+		try {
+			entityHandler.createContentValues(null);
+			fail("Cannot create content from null as entity");
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
-	@Test
-	public final void testToDatabaseName() {
-		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("abcdefghijklmnopqrstuvwxyz"));
-		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-		assertEquals("abcdefghijklmnopqrstuvwxyz1234567890", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
-		assertEquals("t3st3", entityHandler.toDatabaseName("t3st3"));
-		assertEquals("t_st__", entityHandler.toDatabaseName("t#st@$"));
-		assertEquals("t_s_t__", entityHandler.toDatabaseName("t#s t@$"));
-	}
+	//	@Test
+	//	public final void testToDatabaseName() {
+	//		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("abcdefghijklmnopqrstuvwxyz"));
+	//		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	//		assertEquals("abcdefghijklmnopqrstuvwxyz1234567890", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
+	//		assertEquals("t3st3", entityHandler.toDatabaseName("t3st3"));
+	//		assertEquals("t_st__", entityHandler.toDatabaseName("t#st@$"));
+	//		assertEquals("t_s_t__", entityHandler.toDatabaseName("t#s t@$"));
+	//	}
 
 	@Test
 	@Ignore
