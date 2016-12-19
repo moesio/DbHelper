@@ -1,7 +1,8 @@
-package com.seimos.android.dbhelper.database;
+package com.seimos.android.dbhelper.criterion;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.seimos.android.dbhelper.util.Application;
@@ -17,7 +18,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		super(context, databaseName, null, Application.getVersion(context));
 		this.initialQueries = initialQueries;
 		this.patches = patches;
-		DatabaseHelper.instance = this;
+		instance = this;
+		database = null;
 	}
 
 	@Override
@@ -53,24 +55,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	public static SQLiteDatabase openForRead() {
+	public static SQLiteDatabase open() {
 		if (instance == null) {
 			throw new IllegalArgumentException("None instance of DatabaseHelper found");
 		} else if (database == null || !database.isOpen()) {
-			database = instance.getReadableDatabase();
+			try {
+				database = instance.getWritableDatabase();
+			} catch (SQLiteException e) {
+				database = instance.getReadableDatabase();
+			}
 		}
 		return database;
 	}
-
-	public static SQLiteDatabase openForWrite() {
-		if (instance == null) {
-			throw new IllegalArgumentException("None instance of DatabaseHelper found");
-		} else if (database == null || !database.isOpen()) {
-			database = instance.getWritableDatabase();
-		}
-		return database;
-	}
-
+	
 	/**
 	 * @author moesio @ gmail.com
 	 * @date Dec 3, 2016 9:42:47 AM

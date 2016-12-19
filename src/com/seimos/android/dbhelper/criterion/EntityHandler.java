@@ -1,26 +1,20 @@
-package com.seimos.android.dbhelper.database;
+package com.seimos.android.dbhelper.criterion;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.style.CharacterStyle;
 
-import com.seimos.android.dbhelper.exception.InvalidModifierException;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**
@@ -80,7 +74,7 @@ public class EntityHandler {
 				} else if (field.getType() == Boolean.class) {
 					contentValues.put(databaseFieldName, (Boolean) value);
 				} else if (field.getType() == Date.class) {
-					contentValues.put(databaseFieldName, Filter.getStringValue(value));
+					contentValues.put(databaseFieldName, Reflection.getDateFormat(field).format(value));
 				} else if (field.getType() == Double.class) {
 					contentValues.put(databaseFieldName, (Double) value);
 				} else if (field.getType() == Long.class) {
@@ -125,32 +119,23 @@ public class EntityHandler {
 				try {
 					Field field = entityClass.getDeclaredField(columnName);
 					Class<?> type = field.getType();
-					//					Method method = entityClass.getMethod(Reflection.getSetter(columnName), type);
 
 					if (type == Boolean.class) {
-						//						method.invoke(entity, cursor.getInt(cursor.getColumnIndex(columnName)));
-						Reflection.setValue(entity, columnName, cursor.getInt(cursor.getColumnIndex(columnName)));
+						int boolValue = cursor.getInt(cursor.getColumnIndex(columnName));
+						Reflection.setValue(entity, columnName, boolValue==1?true:false);
 					} else if (type == Integer.class) {
-						//						method.invoke(entity, cursor.getInt(cursor.getColumnIndex(columnName)));
 						Reflection.setValue(entity, columnName, cursor.getInt(cursor.getColumnIndex(columnName)));
 					} else if (type == String.class) {
-						//						method.invoke(entity, cursor.getString(cursor.getColumnIndex(columnName)));
 						Reflection.setValue(entity, columnName, cursor.getString(cursor.getColumnIndex(columnName)));
 					} else if (type == Date.class) {
 						String value = cursor.getString(cursor.getColumnIndex(columnName));
-						Date date = null;
 						try {
-							// TODO Define an Temporal annotation to solve format
-							date = new SimpleDateFormat("yyyy-MM-dd").parse(value);
+							Reflection.setValue(entity, columnName, Reflection.getDateFormat(field).parse(value));
 						} catch (ParseException e) {
 						}
-						//						method.invoke(entity, date);
-						Reflection.setValue(entity, columnName, date);
 					} else if (type == Double.class) {
-						//						method.invoke(entity, cursor.getDouble(cursor.getColumnIndex(columnName)));
 						Reflection.setValue(entity, columnName, cursor.getDouble(cursor.getColumnIndex(columnName)));
 					} else if (type == Long.class) {
-						//						method.invoke(entity, cursor.getLong(cursor.getColumnIndex(columnName)));
 						Reflection.setValue(entity, columnName, cursor.getLong(cursor.getColumnIndex(columnName)));
 					} else {
 						// TODO Test deep associations more than one level, ie, nested association
@@ -163,7 +148,7 @@ public class EntityHandler {
 
 						@SuppressWarnings("unchecked")
 						EntityHandler entityHandler = new EntityHandler(context, (Class<? extends BaseEntity>) field.getType());
-						SQLiteDatabase database = DatabaseHelper.openForRead();
+						SQLiteDatabase database = DatabaseHelper.open();
 						String idFieldName = Reflection.getIdField(field.getType()).getName();
 						// TODO Verify when id field is not an Integer
 						Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?",
@@ -173,7 +158,6 @@ public class EntityHandler {
 						}
 						database.close();
 
-						//						method.invoke(entity, association);
 						Reflection.setValue(entity, columnName, association);
 					}
 				} catch (NoSuchFieldException e) {

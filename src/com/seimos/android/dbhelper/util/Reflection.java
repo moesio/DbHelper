@@ -4,11 +4,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
-import com.seimos.android.dbhelper.annotation.Id;
-import com.seimos.android.dbhelper.database.BaseEntity;
+import android.text.format.DateFormat;
+
+import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.exception.ReflectionException;
+import com.seimos.android.dbhelper.persistence.Id;
+import com.seimos.android.dbhelper.persistence.Temporal;
 
 public class Reflection {
 
@@ -134,4 +140,36 @@ public class Reflection {
 		}
 
 	}
+
+	public static String getStringValue(Object value) {
+		if (value != null) {
+			// TODO Create Temporal annotation for choose format
+			return (value.getClass() == Date.class) ? ((String) DateFormat.format("yyyy-MM-dd", (Date) value)) : (value.toString());
+		} else {
+			return "";
+		}
+	}
+	
+	public static SimpleDateFormat getDateFormat(Field field) {
+		String dateFormat = null;
+		if (field.isAnnotationPresent(Temporal.class)) {
+			Temporal temporal = field.getAnnotation(Temporal.class);
+			switch (temporal.value()) {
+			case DATE:
+				dateFormat = "yyyy-MM-dd";
+				break;
+			case TIME:
+				dateFormat = "HH:mm:ss";
+				break;
+			case TIMESTAMP:
+				dateFormat = "yyyy-MM-dd HH:mm:ss";
+				break;
+			}
+		} else {
+			dateFormat = "yyyy-MM-dd";
+		}
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+		return simpleDateFormat;
+	}
+	
 }

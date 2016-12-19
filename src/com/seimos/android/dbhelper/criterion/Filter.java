@@ -1,8 +1,6 @@
-package com.seimos.android.dbhelper.database;
+package com.seimos.android.dbhelper.criterion;
 
-import java.util.Date;
-
-import android.text.format.DateFormat;
+import com.seimos.android.dbhelper.util.Reflection;
 
 /**
  * @author moesio @ gmail.com
@@ -17,18 +15,10 @@ public class Filter {
 
 	public Filter(String column, Object value, Restriction restriction) {
 		this.column = column;
-		this.value = getStringValue(value);
+		this.value = Reflection.getStringValue(value);
 		this.restriction = restriction;
 	}
 	
-	public static String getStringValue(Object value) {
-		if (value != null) {
-			return (value.getClass() == Date.class) ? ((String) DateFormat.format("yyyy-MM-dd", (Date) value)) : (value.toString());
-		} else {
-			return "";
-		}
-	}
-
 	public Filter(OrderBy orderBy) {
 		this.orderBy = orderBy;
 	}

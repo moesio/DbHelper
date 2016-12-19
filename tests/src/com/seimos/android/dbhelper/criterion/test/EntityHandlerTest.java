@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.database.test;
+package com.seimos.android.dbhelper.criterion.test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -14,11 +14,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.database.BaseEntity;
-import com.seimos.android.dbhelper.database.DatabaseHelper;
-import com.seimos.android.dbhelper.database.EntityHandler;
-import com.seimos.android.dbhelper.database.Filter;
+import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.criterion.DatabaseHelper;
+import com.seimos.android.dbhelper.criterion.EntityHandler;
 import com.seimos.android.dbhelper.exception.InvalidModifierException;
+import com.seimos.android.dbhelper.util.Reflection;
 
 /**
  * @author moesio @ gmail.com
@@ -88,12 +88,13 @@ public class EntityHandlerTest extends AndroidTestCase {
 
 	@Test
 	public final void testCreateEntityFromCursor() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), null, Something.TABLE_CREATION_QUERY, null);
+		getContext().deleteDatabase("entityHandlerTestCreateEntityFromCursor");
+		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), "entityHandlerTestCreateEntityFromCursor", Something.TABLE_CREATION_QUERY, null);
 		SQLiteDatabase db = databaseHelper.getWritableDatabase();
 		Something something = new Something().setaBoolean(true).setaDate(new Date()).setaDouble(0.5).setaInteger(2).setName("something");
 		long insert = db.insert("something", null, entityHandler.createContentValues(something));
 		if (insert != -1) {
-			Cursor cursor = db.query("something", Something.COLUMNS, null, null, null, null, null);
+			Cursor cursor = db.query("something", new String[] { "id", "name", "aInteger", "aBoolean", "aDate", "aDouble" }, null, null, null, null, null);
 			cursor.moveToFirst();
 			Something actual = (Something) entityHandler.createEntityFromCursor(cursor);
 			assertEquals(something.getName(), actual.getName());
@@ -104,7 +105,8 @@ public class EntityHandlerTest extends AndroidTestCase {
 
 	@Test
 	public final void testExtract() {
-		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), null, new String[] { "create table extract (name varchar, flag boolean, value integer);" }, null);
+		getContext().deleteDatabase("entityHandlerTestExtract");
+		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), "entityHandlerTestExtract", new String[] { "create table extract (name varchar, flag boolean, value integer);" }, null);
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		db.execSQL("insert into extract values ('John Doe', 'true', 1000)");
 		Cursor cursor = db.query("extract", new String[] { "name", "flag", "value" }, null, null, null, null, null);
@@ -134,7 +136,7 @@ public class EntityHandlerTest extends AndroidTestCase {
 		something.setName("Foo");
 		ContentValues expectedContentValues = new ContentValues();
 		expectedContentValues.put("aBoolean", true);
-		expectedContentValues.put("aDate", Filter.getStringValue(now));
+		expectedContentValues.put("aDate", Reflection.getStringValue(now));
 		expectedContentValues.put("aDouble", 2.);
 		expectedContentValues.put("id", 1L);
 		expectedContentValues.put("aInteger", 2);

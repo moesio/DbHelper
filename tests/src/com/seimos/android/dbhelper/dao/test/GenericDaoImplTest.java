@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.database.DatabaseHelper;
-import com.seimos.android.dbhelper.database.test.Something;
+import com.seimos.android.dbhelper.criterion.DatabaseHelper;
+import com.seimos.android.dbhelper.criterion.test.Something;
 
 /**
  * @author moesio @ gmail.com
@@ -15,22 +15,11 @@ import com.seimos.android.dbhelper.database.test.Something;
  */
 public class GenericDaoImplTest extends AndroidTestCase {
 
-	private SomethingDaoImpl dao;
-
-	public void setUp() {
-		dao = new SomethingDaoImpl(getContext());
-		new DatabaseHelper(getContext(), null, Something.TABLE_CREATION_QUERY, null);
-	}
-
-	//	Long id;
-	//	String name;
-	//	Integer integer;
-	//	Boolean bool;
-	//	Date date;
-	//	Double doub;
-
 	@Test
 	public final void testCreate() {
+		SomethingDaoImpl dao = new SomethingDaoImpl(getContext());
+		getContext().deleteDatabase("genericDaoTest");
+		new DatabaseHelper(getContext(), "genericDaoTest", Something.TABLE_CREATION_QUERY, null);
 		Something something = new Something().setaBoolean(true).setaDate(new Date()).setaDouble(0.5).setaInteger(2).setName("something");
 		assertTrue(dao.create(something));
 		try {

@@ -1,7 +1,7 @@
 package com.seimos.android.dbhelper.dao.test;
 
+import com.seimos.android.dbhelper.criterion.test.Something;
 import com.seimos.android.dbhelper.dao.GenericDao;
-import com.seimos.android.dbhelper.database.test.Something;
 
 /**
  * @author moesio @ gmail.com

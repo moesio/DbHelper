@@ -1,8 +1,10 @@
-package com.seimos.android.dbhelper.database.test;
+package com.seimos.android.dbhelper.criterion.test;
 
 import java.util.Date;
 
-import com.seimos.android.dbhelper.database.BaseEntity;
+import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.persistence.Temporal;
+import com.seimos.android.dbhelper.persistence.TemporalType;
 
 /**
  * @author moesio @ gmail.com
@@ -10,14 +12,20 @@ import com.seimos.android.dbhelper.database.BaseEntity;
  */
 public class Something extends BaseEntity {
 
-	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, ainteger INTEGER, aboolean BOOLEAN, adate TIMESTAMP, adouble REAL)" };
-	public static final String[] COLUMNS = new String[] { "id", "name", "aInteger", "aBoolean", "aDate", "aDouble" };;
+	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, aInteger INTEGER, aBoolean BOOLEAN, aDate TIMESTAMP, aDouble REAL)" };
+	public static final String[] COLUMNS = new String[] { "id", "name", "aInteger", "aBoolean", "aDate", "aDouble", "dateOnly", "timeOnly", "fullDateTime" };
 	Long id;
 	String name;
 	Integer aInteger;
 	Boolean aBoolean;
 	Date aDate;
 	Double aDouble;
+	@Temporal(TemporalType.DATE)
+	Date dateOnly;
+	@Temporal(TemporalType.TIME)
+	Date timeOnly;
+	@Temporal(TemporalType.TIMESTAMP)
+	Date fullDateTime;
 
 	@Override
 	public String toString() {

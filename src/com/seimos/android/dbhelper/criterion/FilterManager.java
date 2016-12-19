@@ -1,6 +1,8 @@
-package com.seimos.android.dbhelper.database;
+package com.seimos.android.dbhelper.criterion;
 
 import java.util.ArrayList;
+
+import com.seimos.android.dbhelper.util.Reflection;
 
 /**
  * @author moesio @ gmail.com
@@ -28,7 +30,7 @@ public class FilterManager {
 					this.orderBy = filters[i].getOrderBy().toString();
 				} else {
 					selectionBuilder.append(filters[i].getClausule());
-					String arg = Filter.getStringValue(filters[i].getValue());
+					String arg = Reflection.getStringValue(filters[i].getValue());
 					if (arg != null) {
 						argsBuilder.add(arg);
 					}

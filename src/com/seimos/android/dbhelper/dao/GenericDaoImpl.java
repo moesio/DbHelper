@@ -13,11 +13,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.seimos.android.dbhelper.database.BaseEntity;
-import com.seimos.android.dbhelper.database.DatabaseHelper;
-import com.seimos.android.dbhelper.database.EntityHandler;
-import com.seimos.android.dbhelper.database.Filter;
-import com.seimos.android.dbhelper.database.FilterManager;
+import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.criterion.DatabaseHelper;
+import com.seimos.android.dbhelper.criterion.EntityHandler;
+import com.seimos.android.dbhelper.criterion.Filter;
+import com.seimos.android.dbhelper.criterion.FilterManager;
 import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 
@@ -39,18 +39,18 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 	}
 
 	public boolean create(Entity entity) {
-		SQLiteDatabase database = null;
+		SQLiteDatabase connection = null;
 		long id = 0;
 		try {
-			database = DatabaseHelper.openForWrite();
+			connection = DatabaseHelper.open();
 			ContentValues values = entityHandler.createContentValues(entity);
-			id = database.insert(entityHandler.getTableName(), null, values);
+			id = connection.insert(entityHandler.getTableName(), null, values);
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while creating " + entityClass.getSimpleName());
 			throw e;
 		} finally {
-			if (database != null) {
-				database.close();
+			if (connection != null) {
+				connection.close();
 			}
 		}
 		return id > 0;
@@ -58,16 +58,16 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 
 	@SuppressWarnings("unchecked")
 	public Entity retrieve(Object id) {
-		SQLiteDatabase database = null;
+		SQLiteDatabase connection = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
-			database = DatabaseHelper.openForRead();
+			connection = DatabaseHelper.open();
 			Cursor cursor;
 			try {
 				Field idField = Reflection.getIdField(entityClass);
-				String idValue = Filter.getStringValue(id);
+				String idValue = Reflection.getStringValue(id);
 				String idFieldName = idField.getName();
-				cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error while retrieving.");
@@ -78,8 +78,8 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			Log.e(Application.getName(context), "Error while retriving " + entityClass.getSimpleName());
 			throw e;
 		} finally {
-			if (database != null) {
-				database.close();
+			if (connection != null) {
+				connection.close();
 			}
 		}
 		try {
@@ -95,15 +95,15 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 
 	@SuppressWarnings("unchecked")
 	public List<Entity> filter(Filter... filters) {
-		SQLiteDatabase database = null;
+		SQLiteDatabase connection = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
-			database = DatabaseHelper.openForRead();
+			connection = DatabaseHelper.open();
 			Cursor cursor;
 			try {
 				FilterManager filterManager = new FilterManager(filters);
 				String orderBy = filterManager.getOrderBy();
-				cursor = database.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getSelection(), filterManager.getArgs(), null, null, orderBy);
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getSelection(), filterManager.getArgs(), null, null, orderBy);
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error in filter");
@@ -114,45 +114,45 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			Log.e(Application.getName(context), "Error while filtering " + entityClass.getSimpleName());
 			throw e;
 		} finally {
-			if (database != null) {
-				database.close();
+			if (connection != null) {
+				connection.close();
 			}
 		}
 		return (List<Entity>) list;
 	}
 
 	public boolean update(Entity entity) {
-		SQLiteDatabase database = null;
+		SQLiteDatabase connection = null;
 		try {
-			database = DatabaseHelper.openForWrite();
+			connection = DatabaseHelper.open();
 			ContentValues values = entityHandler.createContentValues(entity);
 			Field idField = Reflection.getIdField(entityClass);
 			Method method = entityClass.getMethod(Reflection.getGetter(idField));
-			int affectedRows = database.update(entityHandler.getTableName(), values, "id = ?", new String[] { method.invoke(entity).toString() });
+			int affectedRows = connection.update(entityHandler.getTableName(), values, "id = ?", new String[] { method.invoke(entity).toString() });
 			return affectedRows != 0;
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while updating " + entityClass.getSimpleName());
 			return false;
 		} finally {
-			if (database != null) {
-				database.close();
+			if (connection != null) {
+				connection.close();
 			}
 		}
 	}
 
 	public boolean delete(Object id) {
-		SQLiteDatabase database = null;
+		SQLiteDatabase connection = null;
 		int affectedRows = 0;
 		try {
-			database = DatabaseHelper.openForWrite();
-			affectedRows = database.delete(entityHandler.getTableName(), "id = ?", new String[] { id.toString() });
-			database.close();
+			connection = DatabaseHelper.open();
+			affectedRows = connection.delete(entityHandler.getTableName(), "id = ?", new String[] { id.toString() });
+			connection.close();
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while deleting " + entityClass.getSimpleName());
 			throw e;
 		} finally {
-			if (database != null) {
-				database.close();
+			if (connection != null) {
+				connection.close();
 			}
 		}
 		return affectedRows > 0;

@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.database;
+package com.seimos.android.dbhelper.criterion;
 
 /**
  * @author moesio @ gmail.com

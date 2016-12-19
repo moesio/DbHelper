@@ -2,14 +2,15 @@ package com.seimos.android.dbhelper.util.test;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.annotation.Id;
-import com.seimos.android.dbhelper.database.BaseEntity;
-import com.seimos.android.dbhelper.database.test.Something;
+import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.criterion.test.Something;
+import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**
@@ -39,12 +40,16 @@ public class ReflectionTest extends AndroidTestCase {
 	@Test
 	public final void testGetGetterField() {
 		Field[] fields = Reflection.getInnerDeclaredFields(Something.class);
-		assertEquals("getaBoolean", Reflection.getGetter(fields[0]));
-		assertEquals("getaDate", Reflection.getGetter(fields[1]));
-		assertEquals("getaDouble", Reflection.getGetter(fields[2]));
-		assertEquals("getaInteger", Reflection.getGetter(fields[3]));
-		assertEquals("getId", Reflection.getGetter(fields[4]));
-		assertEquals("getName", Reflection.getGetter(fields[5]));
+		int i = 0;
+		assertEquals("getaBoolean", Reflection.getGetter(fields[i++]));
+		assertEquals("getaDate", Reflection.getGetter(fields[i++]));
+		assertEquals("getaDouble", Reflection.getGetter(fields[i++]));
+		assertEquals("getaInteger", Reflection.getGetter(fields[i++]));
+		assertEquals("getDateOnly", Reflection.getGetter(fields[i++]));
+		assertEquals("getFullDateTime", Reflection.getGetter(fields[i++]));
+		assertEquals("getId", Reflection.getGetter(fields[i++]));
+		assertEquals("getName", Reflection.getGetter(fields[i++]));
+		assertEquals("getTimeOnly", Reflection.getGetter(fields[i++]));
 	}
 
 	@Test
@@ -121,19 +126,34 @@ public class ReflectionTest extends AndroidTestCase {
 		Reflection.setValue(something, "name", "John Doe");
 		assertEquals("John Doe", something.getName());
 		assertNull(something.getaBoolean());
-		
+
 		class Foo {
 			private String bar;
 
 			public String getBar() {
 				return bar;
 			}
-			
-			
+
 		}
-		
+
 		Foo foo = new Foo();
 		Reflection.setValue(foo, "bar", "bar");
 		assertEquals("bar", foo.getBar());
+	}
+
+	@Test
+	public final void testGetDateFormat() {
+		Field[] fields = Reflection.getInnerDeclaredFields(Something.class);
+		for (Field field : fields) {
+			if (field.getName().equals("dateOnly")) {
+				assertEquals("2016-12-17", Reflection.getDateFormat(field).format(new GregorianCalendar(2016, 11, 17).getTime()));
+			} else if (field.getName().equals("timeOnly")) {
+				assertEquals("23:28:30", Reflection.getDateFormat(field).format(new GregorianCalendar(2016, 11, 17, 23, 28, 30).getTime()));
+			} else if (field.getName().equals("timeOnly")) {
+				assertEquals("2016-12-17 23:28:30", Reflection.getDateFormat(field).format(new GregorianCalendar(2016, 11, 17, 23, 28, 30).getTime()));
+			} else if (field.getName().equals("aDate")) {
+				assertEquals("2016-12-17", Reflection.getDateFormat(field).format(new GregorianCalendar(2016, 11, 17).getTime()));
+			}
+		}
 	}
 }

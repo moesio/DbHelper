@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.annotation;
+package com.seimos.android.dbhelper.persistence;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

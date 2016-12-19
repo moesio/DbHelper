@@ -2,10 +2,10 @@ package com.seimos.android.dbhelper.manager.test;
 
 import android.content.Context;
 
+import com.seimos.android.dbhelper.criterion.test.Something;
 import com.seimos.android.dbhelper.dao.GenericDao;
 import com.seimos.android.dbhelper.dao.test.SomethingDao;
 import com.seimos.android.dbhelper.dao.test.SomethingDaoImpl;
-import com.seimos.android.dbhelper.database.test.Something;
 import com.seimos.android.dbhelper.manager.GenericManagerImpl;
 
 /**
