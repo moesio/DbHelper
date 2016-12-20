@@ -106,16 +106,16 @@ public class EntityHandlerTest extends AndroidTestCase {
 	@Test
 	public final void testExtract() {
 		getContext().deleteDatabase("entityHandlerTestExtract");
-		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), "entityHandlerTestExtract", new String[] { "create table extract (name varchar, flag boolean, value integer);" }, null);
+		DatabaseHelper databaseHelper = new DatabaseHelper(getContext(), "entityHandlerTestExtract",
+				new String[] { "create table extract (name varchar, flag boolean, value integer);" }, null);
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		db.execSQL("insert into extract values ('John Doe', 'true', 1000)");
 		Cursor cursor = db.query("extract", new String[] { "name", "flag", "value" }, null, null, null, null, null);
 		try {
 			entityHandler.extract(cursor).size();
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | NoSuchMethodException  e) {
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
 		}
-		
-		
+
 	}
 
 	@Test
@@ -136,7 +136,10 @@ public class EntityHandlerTest extends AndroidTestCase {
 		something.setName("Foo");
 		ContentValues expectedContentValues = new ContentValues();
 		expectedContentValues.put("aBoolean", true);
-		expectedContentValues.put("aDate", Reflection.getStringValue(now));
+		try {
+			expectedContentValues.put("aDate", Reflection.getStringValue(Something.class, "aDate", now));
+		} catch (NoSuchFieldException e1) {
+		}
 		expectedContentValues.put("aDouble", 2.);
 		expectedContentValues.put("id", 1L);
 		expectedContentValues.put("aInteger", 2);
@@ -150,23 +153,12 @@ public class EntityHandlerTest extends AndroidTestCase {
 			iterator.remove();
 		}
 		assertEquals(0, keySet.size());
-		//		assertEquals(expectedContentValues, actualContentValues);
 		try {
 			entityHandler.createContentValues(null);
 			fail("Cannot create content from null as entity");
 		} catch (IllegalArgumentException e) {
 		}
 	}
-
-	//	@Test
-	//	public final void testToDatabaseName() {
-	//		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("abcdefghijklmnopqrstuvwxyz"));
-	//		assertEquals("abcdefghijklmnopqrstuvwxyz", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-	//		assertEquals("abcdefghijklmnopqrstuvwxyz1234567890", entityHandler.toDatabaseName("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
-	//		assertEquals("t3st3", entityHandler.toDatabaseName("t3st3"));
-	//		assertEquals("t_st__", entityHandler.toDatabaseName("t#st@$"));
-	//		assertEquals("t_s_t__", entityHandler.toDatabaseName("t#s t@$"));
-	//	}
 
 	@Test
 	@Ignore

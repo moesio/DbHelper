@@ -9,12 +9,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**
@@ -97,7 +98,6 @@ public class EntityHandler {
 		return list;
 	}
 
-	@SuppressLint("SimpleDateFormat")
 	public BaseEntity createEntityFromCursor(final Cursor cursor) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		BaseEntity entity = entityClass.newInstance();
 		if (cursor.getCount() > 0) {
@@ -107,23 +107,23 @@ public class EntityHandler {
 					Field field = entityClass.getDeclaredField(columnName);
 					Class<?> type = field.getType();
 
+					Object value = null;
 					if (type == Boolean.class) {
-						int boolValue = cursor.getInt(cursor.getColumnIndex(columnName));
-						Reflection.setValue(entity, columnName, boolValue==1?true:false);
+						value = cursor.getInt(cursor.getColumnIndex(columnName))==1?true:false;
 					} else if (type == Integer.class) {
-						Reflection.setValue(entity, columnName, cursor.getInt(cursor.getColumnIndex(columnName)));
+						value = cursor.getInt(cursor.getColumnIndex(columnName));
 					} else if (type == String.class) {
-						Reflection.setValue(entity, columnName, cursor.getString(cursor.getColumnIndex(columnName)));
+						value = cursor.getString(cursor.getColumnIndex(columnName));
 					} else if (type == Date.class) {
-						String value = cursor.getString(cursor.getColumnIndex(columnName));
+						String stringValue = cursor.getString(cursor.getColumnIndex(columnName));
 						try {
-							Reflection.setValue(entity, columnName, Reflection.getDateFormat(field).parse(value));
+							value = Reflection.getDateFormat(field).parse(stringValue);
 						} catch (ParseException e) {
 						}
 					} else if (type == Double.class) {
-						Reflection.setValue(entity, columnName, cursor.getDouble(cursor.getColumnIndex(columnName)));
+						value = cursor.getDouble(cursor.getColumnIndex(columnName));
 					} else if (type == Long.class) {
-						Reflection.setValue(entity, columnName, cursor.getLong(cursor.getColumnIndex(columnName)));
+						value = cursor.getLong(cursor.getColumnIndex(columnName));
 					} else {
 						// TODO Test deep associations more than one level, ie, nested association
 
@@ -145,9 +145,11 @@ public class EntityHandler {
 						}
 						database.close();
 
-						Reflection.setValue(entity, columnName, association);
+						value = association;
 					}
+					Reflection.setValue(entity, columnName, value);
 				} catch (NoSuchFieldException e) {
+					Log.d(Application.getName(context), "There is no " + columnName + " field for " + entityClass.getCanonicalName());
 				}
 			}
 		}

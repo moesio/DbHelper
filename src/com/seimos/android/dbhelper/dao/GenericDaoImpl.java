@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -17,7 +18,6 @@ import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.criterion.DatabaseHelper;
 import com.seimos.android.dbhelper.criterion.EntityHandler;
 import com.seimos.android.dbhelper.criterion.Filter;
-import com.seimos.android.dbhelper.criterion.FilterManager;
 import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 
@@ -26,6 +26,75 @@ import com.seimos.android.dbhelper.util.Reflection;
  * @date Jul 28, 2015 5:47:59 PM
  */
 public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Entity> {
+
+	/**
+	 * @author moesio @ gmail.com
+	 * @date Aug 3, 2015 7:33:50 PM
+	 */
+	private class FilterManager {
+		private Filter[] filters;
+		private String projection;
+		private String[] args;
+		private String orderBy;
+
+		public FilterManager(Filter[] filters) {
+			this.filters = filters;
+			split();
+		}
+
+		private void split() {
+			if (filters != null && filters.length > 0) {
+				ArrayList<String> argsBuilder = new ArrayList<String>();
+				StringBuilder projectionBuilder = new StringBuilder();
+				StringBuilder orderBuilder = new StringBuilder();
+				for (int i = 0; i < filters.length; i++) {
+					if (filters[i].getOrderBy() != null) {
+						orderBuilder.append(filters[i].getOrderBy().toString());
+
+						if (i < (filters.length - 1)) {
+							orderBuilder.append(", ");
+						}
+					} else {
+						projectionBuilder.append(filters[i].getClausule());
+						String arg = null;
+						try {
+							arg = Reflection.getStringValue(entityClass, filters[i].getColumn(), filters[i].getValue());
+						} catch (NoSuchFieldException e) {
+							Log.d(Application.getName(context), "There is no field " + filters[i].getColumn() + " in " + entityClass.getCanonicalName());
+						}
+
+						if (arg != null) {
+							argsBuilder.add(arg);
+						}
+
+						if (i < (filters.length - 1)) {
+							projectionBuilder.append(", ");
+						}
+					}
+				}
+				if (projectionBuilder.length() > 0) {
+					this.projection = projectionBuilder.toString();
+					this.orderBy = orderBuilder.toString();
+				}
+				if (argsBuilder.size() > 0) {
+					args = new String[argsBuilder.size()];
+					argsBuilder.toArray(args);
+				}
+			}
+		}
+
+		public String getProjection() {
+			return projection;
+		}
+
+		public String[] getArgs() {
+			return args;
+		}
+
+		public String getOrderBy() {
+			return orderBy;
+		}
+	}
 
 	private Context context;
 	private Class<Entity> entityClass;
@@ -65,7 +134,12 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			Cursor cursor;
 			try {
 				Field idField = Reflection.getIdField(entityClass);
-				String idValue = Reflection.getStringValue(id);
+				String idValue;
+				if (idField.getClass().equals(Date.class)) {
+					idValue = Reflection.getDateFormat(idField).format(id);
+				} else {
+					idValue = id.toString();
+				}
 				String idFieldName = idField.getName();
 				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
 				list = entityHandler.extract(cursor);
@@ -103,7 +177,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			try {
 				FilterManager filterManager = new FilterManager(filters);
 				String orderBy = filterManager.getOrderBy();
-				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getSelection(), filterManager.getArgs(), null, null, orderBy);
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getProjection(), filterManager.getArgs(), null, null, orderBy);
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error in filter");

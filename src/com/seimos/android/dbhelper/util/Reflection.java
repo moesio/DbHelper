@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import android.text.format.DateFormat;
-
 import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.exception.ReflectionException;
 import com.seimos.android.dbhelper.persistence.Id;
@@ -141,16 +139,18 @@ public class Reflection {
 
 	}
 
-	public static String getStringValue(Object value) {
+	public static <Entity extends BaseEntity> String getStringValue(Class<Entity> entityClass, String fieldName, Object value) throws NoSuchFieldException {
 		if (value != null) {
-			// TODO Create Temporal annotation for choose format
-			return (value.getClass() == Date.class) ? ((String) DateFormat.format("yyyy-MM-dd", (Date) value)) : (value.toString());
+			return (value.getClass() == Date.class) ? Reflection.getDateFormat(entityClass.getField(fieldName)).format(value) : (value.toString());
 		} else {
 			return "";
 		}
 	}
-	
+
 	public static SimpleDateFormat getDateFormat(Field field) {
+		if (!field.getType().equals(Date.class)) {
+			throw new IllegalArgumentException("Field " + field.getName() + " it's not " + Date.class.getCanonicalName());
+		}
 		String dateFormat = null;
 		if (field.isAnnotationPresent(Temporal.class)) {
 			Temporal temporal = field.getAnnotation(Temporal.class);
@@ -171,5 +171,5 @@ public class Reflection {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
 		return simpleDateFormat;
 	}
-	
+
 }

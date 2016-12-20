@@ -10,12 +10,12 @@ public class Filter {
 
 	private String column;
 	private Restriction restriction;
-	private String value;
+	private Object value;
 	private OrderBy orderBy;
 
 	public Filter(String column, Object value, Restriction restriction) {
 		this.column = column;
-		this.value = Reflection.getStringValue(value);
+		this.value = value;
 		this.restriction = restriction;
 	}
 	
@@ -27,7 +27,7 @@ public class Filter {
 		return column;
 	}
 
-	public String getValue() {
+	public Object getValue() {
 		return value;
 	}
 
