@@ -10,7 +10,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return ">= ?";
+			return " >= ?";
 		}
 
 	},
@@ -18,7 +18,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "= ?";
+			return " = ?";
 		}
 
 	},
@@ -26,7 +26,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "<> ?";
+			return " <> ?";
 		}
 
 	},
@@ -34,7 +34,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "like ?";
+			return " like ?";
 		}
 
 	},
@@ -42,7 +42,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "> ?";
+			return " > ?";
 		}
 
 	},
@@ -50,7 +50,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "< ?";
+			return " < ?";
 		}
 
 	},
@@ -58,7 +58,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "<= ?";
+			return " <= ?";
 		}
 
 	},
@@ -66,7 +66,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "like ?";
+			return " like ?";
 		}
 
 	},
@@ -74,7 +74,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "between ? and ?";
+			return " between ? and ?";
 		}
 
 	},
@@ -82,7 +82,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "in (?)";
+			return " in (?)";
 		}
 
 	},
@@ -90,7 +90,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "is null";
+			return " is null";
 		}
 
 	},
@@ -98,7 +98,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "= ?";
+			return " = ?";
 		}
 
 	},
@@ -106,7 +106,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "<> ? ";
+			return " <> ? ";
 		}
 
 	},
@@ -114,7 +114,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "< ?";
+			return " < ?";
 		}
 
 	},
@@ -122,7 +122,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "<= ?";
+			return " <= ?";
 		}
 
 	},
@@ -130,7 +130,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "> ?";
+			return " > ?";
 		}
 
 	},
@@ -138,7 +138,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return ">= ?";
+			return " >= ?";
 		}
 
 	},
@@ -146,7 +146,7 @@ public enum Restriction {
 
 		@Override
 		public String getExpression() {
-			return "is not null";
+			return " is not null";
 		}
 
 	};

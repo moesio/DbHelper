@@ -109,16 +109,18 @@ public class EntityHandler {
 
 					Object value = null;
 					if (type == Boolean.class) {
-						value = cursor.getInt(cursor.getColumnIndex(columnName))==1?true:false;
+						value = cursor.getInt(cursor.getColumnIndex(columnName)) == 1 ? true : false;
 					} else if (type == Integer.class) {
 						value = cursor.getInt(cursor.getColumnIndex(columnName));
 					} else if (type == String.class) {
 						value = cursor.getString(cursor.getColumnIndex(columnName));
 					} else if (type == Date.class) {
 						String stringValue = cursor.getString(cursor.getColumnIndex(columnName));
-						try {
-							value = Reflection.getDateFormat(field).parse(stringValue);
-						} catch (ParseException e) {
+						if (stringValue != null) {
+							try {
+								value = Reflection.getDateFormat(field).parse(stringValue);
+							} catch (ParseException e) {
+							}
 						}
 					} else if (type == Double.class) {
 						value = cursor.getDouble(cursor.getColumnIndex(columnName));
@@ -147,7 +149,9 @@ public class EntityHandler {
 
 						value = association;
 					}
-					Reflection.setValue(entity, columnName, value);
+					if (value != null) {
+						Reflection.setValue(entity, columnName, value);
+					}
 				} catch (NoSuchFieldException e) {
 					Log.d(Application.getName(context), "There is no " + columnName + " field for " + entityClass.getCanonicalName());
 				}

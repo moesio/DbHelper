@@ -102,7 +102,7 @@ public class ReflectionTest extends AndroidTestCase {
 				return null;
 			}
 		};
-		assertNull(Reflection.getIdField(Something.class));
+		assertNotNull(Reflection.getIdField(Something.class));
 		try {
 			assertEquals(baseEntity.getClass().getDeclaredField("id"), Reflection.getIdField(baseEntity.getClass()));
 		} catch (NoSuchFieldException e) {

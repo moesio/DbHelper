@@ -3,6 +3,7 @@ package com.seimos.android.dbhelper.criterion.test;
 import java.util.Date;
 
 import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
 import com.seimos.android.dbhelper.persistence.TemporalType;
 
@@ -12,8 +13,9 @@ import com.seimos.android.dbhelper.persistence.TemporalType;
  */
 public class Something extends BaseEntity {
 
-	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, aInteger INTEGER, aBoolean BOOLEAN, aDate TIMESTAMP, aDouble REAL)" };
+	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, aInteger INTEGER, aBoolean BOOLEAN, aDate TIMESTAMP, dateOnly TIMESTAMP, timeOnly TIMESTAMP, fullDateTime TIMESTAMP, aDouble REAL)" };
 	public static final String[] COLUMNS = new String[] { "id", "name", "aInteger", "aBoolean", "aDate", "aDouble", "dateOnly", "timeOnly", "fullDateTime" };
+	@Id
 	Long id;
 	String name;
 	Integer aInteger;

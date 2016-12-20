@@ -32,7 +32,7 @@ public class EntityHandlerTest extends AndroidTestCase {
 	protected void setUp() throws Exception {
 		try {
 			new EntityHandler(null, null);
-			fail("Neiar context nor entity parameter can be null");
+			fail("Neither context nor entity parameter can be null");
 		} catch (NullPointerException e) {
 		}
 

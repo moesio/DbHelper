@@ -13,6 +13,7 @@ import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.exception.ReflectionException;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
+import com.seimos.android.dbhelper.persistence.Transient;
 
 public class Reflection {
 
@@ -112,7 +113,7 @@ public class Reflection {
 		Field field;
 		for (int i = 0; i < fields.length; i++) {
 			field = fields[i];
-			if ((clazz.getEnclosingClass() != null && field.getType().equals(clazz.getEnclosingClass())) || Modifier.isFinal(field.getModifiers())) {
+			if ((clazz.getEnclosingClass() != null && field.getType().equals(clazz.getEnclosingClass())) || Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) || field.isAnnotationPresent(Transient.class)) {
 				continue;
 			}
 			fieldList.add(field);

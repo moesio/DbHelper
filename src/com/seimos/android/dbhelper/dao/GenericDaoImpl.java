@@ -126,6 +126,9 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 
 	@SuppressWarnings("unchecked")
 	public Entity retrieve(Object id) {
+		if (Reflection.getIdField(entityClass) == null) {
+			throw new IllegalArgumentException(entityClass.getCanonicalName() + " must have annotated id with @Id");
+		}
 		SQLiteDatabase connection = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		try {
@@ -178,8 +181,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			Cursor cursor;
 			try {
 				FilterManager filterManager = new FilterManager(filters);
-				String orderBy = filterManager.getOrderBy();
-				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null, orderBy);
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null, filterManager.getOrderBy());
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error in filter");
