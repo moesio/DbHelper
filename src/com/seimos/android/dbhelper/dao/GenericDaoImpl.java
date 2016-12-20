@@ -18,6 +18,7 @@ import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.criterion.DatabaseHelper;
 import com.seimos.android.dbhelper.criterion.EntityHandler;
 import com.seimos.android.dbhelper.criterion.Filter;
+import com.seimos.android.dbhelper.exception.NonUniqueResultException;
 import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 
@@ -155,6 +156,9 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			if (connection != null) {
 				connection.close();
 			}
+		}
+		if (list.size() > 1) {
+			throw new NonUniqueResultException();
 		}
 		try {
 			return (Entity) list.get(0);

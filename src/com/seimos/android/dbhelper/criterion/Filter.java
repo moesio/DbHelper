@@ -1,7 +1,5 @@
 package com.seimos.android.dbhelper.criterion;
 
-import com.seimos.android.dbhelper.util.Reflection;
-
 /**
  * @author moesio @ gmail.com
  * @date Aug 3, 2015 7:16:38 PM
@@ -18,7 +16,7 @@ public class Filter {
 		this.value = value;
 		this.restriction = restriction;
 	}
-	
+
 	public Filter(OrderBy orderBy) {
 		this.orderBy = orderBy;
 	}
@@ -38,9 +36,9 @@ public class Filter {
 	public String getClausule() {
 		return new StringBuilder(getColumn()).append(restriction.getOperand()).append("?").toString();
 	}
-	
+
 	public OrderBy getOrderBy() {
 		return this.orderBy;
 	}
-	
+
 }

@@ -40,12 +40,6 @@ public class EntityHandlerTest extends AndroidTestCase {
 
 	}
 
-	//	@Test
-	//	public final void testGetTableName() {
-	//		assertFalse("Something".equals(entityHandler.getTableName()));
-	//		assertEquals("something", entityHandler.getTableName());
-	//	}
-
 	@Test
 	public final void testGetColumns_with_final_fields_in_base_entity() throws InvalidModifierException {
 		BaseEntity baseEntity = new BaseEntity() {
