@@ -34,7 +34,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 	 */
 	private class FilterManager {
 		private Filter[] filters;
-		private String projection;
+		private String where;
 		private String[] args;
 		private String orderBy;
 
@@ -46,35 +46,33 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 		private void split() {
 			if (filters != null && filters.length > 0) {
 				ArrayList<String> argsBuilder = new ArrayList<String>();
-				StringBuilder projectionBuilder = new StringBuilder();
+				StringBuilder whereBuilder = new StringBuilder();
 				StringBuilder orderBuilder = new StringBuilder();
 				for (int i = 0; i < filters.length; i++) {
-					if (filters[i].getOrderBy() != null) {
-						orderBuilder.append(filters[i].getOrderBy().toString());
+					Filter filter = filters[i];
+					if (filter.getOrderBy() != null) {
+						orderBuilder.append(filter.getOrderBy().toString());
 
 						if (i < (filters.length - 1)) {
 							orderBuilder.append(", ");
 						}
 					} else {
-						projectionBuilder.append(filters[i].getClausule());
-						String arg = null;
-						try {
-							arg = Reflection.getStringValue(entityClass, filters[i].getColumn(), filters[i].getValue());
-						} catch (NoSuchFieldException e) {
-							Log.d(Application.getName(context), "There is no field " + filters[i].getColumn() + " in " + entityClass.getCanonicalName());
-						}
+						whereBuilder.append(filter.getWhere());
+						String[] args = filter.getValue();
 
-						if (arg != null) {
-							argsBuilder.add(arg);
+						if (args != null && args.length > 0) {
+							for (String arg : args) {
+								argsBuilder.add(arg);
+							}
 						}
 
 						if (i < (filters.length - 1)) {
-							projectionBuilder.append(", ");
+							whereBuilder.append(", ");
 						}
 					}
 				}
-				if (projectionBuilder.length() > 0) {
-					this.projection = projectionBuilder.toString();
+				if (whereBuilder.length() > 0) {
+					this.where = whereBuilder.toString();
 					this.orderBy = orderBuilder.toString();
 				}
 				if (argsBuilder.size() > 0) {
@@ -84,8 +82,8 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			}
 		}
 
-		public String getProjection() {
-			return projection;
+		public String getWhere() {
+			return where;
 		}
 
 		public String[] getArgs() {
@@ -181,7 +179,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			try {
 				FilterManager filterManager = new FilterManager(filters);
 				String orderBy = filterManager.getOrderBy();
-				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getProjection(), filterManager.getArgs(), null, null, orderBy);
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null, orderBy);
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error in filter");

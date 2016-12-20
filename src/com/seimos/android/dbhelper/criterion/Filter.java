@@ -8,16 +8,17 @@ public class Filter {
 
 	private String column;
 	private Restriction restriction;
-	private Object value;
+	private String[] value;
 	private OrderBy orderBy;
 
-	public Filter(String column, Object value, Restriction restriction) {
+	public Filter(String column, Restriction restriction, String... value) {
 		this.column = column;
 		this.value = value;
 		this.restriction = restriction;
 	}
 
-	public Filter(OrderBy orderBy) {
+	public Filter(String column, OrderBy orderBy) {
+		this.column = column;
 		this.orderBy = orderBy;
 	}
 
@@ -25,16 +26,12 @@ public class Filter {
 		return column;
 	}
 
-	public Object getValue() {
+	public String[] getValue() {
 		return value;
 	}
 
-	public Restriction getRestriction() {
-		return restriction;
-	}
-
-	public String getClausule() {
-		return new StringBuilder(getColumn()).append(restriction.getOperand()).append("?").toString();
+	public String getWhere() {
+		return new StringBuilder(getColumn()).append(restriction.getExpression()).toString();
 	}
 
 	public OrderBy getOrderBy() {
