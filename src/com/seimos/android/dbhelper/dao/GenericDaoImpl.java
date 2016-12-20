@@ -67,7 +67,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 						}
 
 						if (i < (filters.length - 1)) {
-							whereBuilder.append(", ");
+							whereBuilder.append(" and ");
 						}
 					}
 				}
