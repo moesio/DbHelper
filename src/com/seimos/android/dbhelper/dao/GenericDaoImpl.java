@@ -142,7 +142,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 					idValue = id.toString();
 				}
 				String idFieldName = idField.getName();
-				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "1");
+				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?", new String[] { idValue }, null, null, idFieldName, "2");
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error while retrieving.");
