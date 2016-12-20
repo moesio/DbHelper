@@ -4,19 +4,18 @@ import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
+import com.seimos.android.dbhelper.criterion.Filter;
+import com.seimos.android.dbhelper.criterion.Restriction;
+
 /**
  * @author moesio @ gmail.com
  * @date Dec 17, 2016 9:54:33 PM
  */
 public class FilterTest extends AndroidTestCase {
 
-	@Override
-	protected void setUp() throws Exception {
-	}
-	
 	@Test
 	public final void testFilterStringObjectRestriction() {
-//		fail("Not yet implemented"); // TODO
+		new Filter("column", new Object(), Restriction.GE);
 	}
 
 	@Test

@@ -35,18 +35,14 @@ public class EntityHandler {
 	}
 
 	public String getTableName() {
-		return toDatabaseName(entityClass.getSimpleName());
+		return entityClass.getSimpleName();
 	}
 
 	public String[] getColumns() {
 		Field[] fields = Reflection.getInnerDeclaredFields(entityClass);
 		String[] columns = new String[fields.length];
 		for (int i = 0; i < fields.length; i++) {
-			//			columns[i] = toDatabaseName(fields[i].getName());
-			//			if (Modifier.isFinal(fields[i].getModifiers())) {
-			//				throw new InvalidModifierException(entityClass, fields[i]);
-			//			}
-			columns[i] = toDatabaseName(fields[i].getName());
+			columns[i] = fields[i].getName();
 		}
 		Arrays.sort(columns);
 		return columns;
@@ -61,7 +57,7 @@ public class EntityHandler {
 		Field[] declaredFields = Reflection.getInnerDeclaredFields(entity.getClass());
 		for (Field field : declaredFields) {
 			Object value = Reflection.getValue(entity, field.getName());
-			String databaseFieldName = toDatabaseName(field.getName());
+			String databaseFieldName = field.getName();
 			if (value != null) {
 				if (Reflection.isEntity(value)) {
 					Field idField = Reflection.getIdField(field.getType());
@@ -85,15 +81,6 @@ public class EntityHandler {
 			}
 		}
 		return contentValues;
-	}
-
-	public String toDatabaseName(String name) {
-		//		char[] chars = name./*replaceAll("(\\W)", "_").*/toCharArray();
-		//		for (int i = 0; i < chars.length; i++) {
-		//			chars[i] = Character.toLowerCase(chars[i]);
-		//		}
-		//		return new String(chars);
-		return name;
 	}
 
 	public List<BaseEntity> extract(final Cursor cursor) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException,
