@@ -79,6 +79,8 @@ public class EntityHandler {
 				} else {
 					contentValues.put(databaseFieldName, value.toString());
 				}
+			} else {
+				contentValues.putNull(databaseFieldName);
 			}
 		}
 		return contentValues;

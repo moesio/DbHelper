@@ -62,14 +62,6 @@ public enum Restriction {
 		}
 
 	},
-	ILIKE {
-
-		@Override
-		public String getExpression() {
-			return " like ?";
-		}
-
-	},
 	BETWEEN {
 
 		@Override
@@ -85,6 +77,14 @@ public enum Restriction {
 			return " in (?)";
 		}
 
+	},
+	NOTIN {
+		
+		@Override
+		public String getExpression() {
+			return " not in (?)";
+		}
+		
 	},
 	ISNULL {
 

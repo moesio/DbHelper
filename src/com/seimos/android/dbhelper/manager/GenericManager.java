@@ -15,6 +15,8 @@ public interface GenericManager<Entity> {
 
 	List<Entity> list();
 
+	List<Entity> filter(List<Filter> filtersList);
+
 	List<Entity> filter(Filter... filters);
 
 	boolean update(Entity entity);

@@ -1,7 +1,6 @@
 package com.seimos.android.dbhelper.dao;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.seimos.android.dbhelper.exception.NoIdentifierSetted;
 import com.seimos.android.dbhelper.exception.NonUniqueResultException;
 import com.seimos.android.dbhelper.persistence.BaseEntity;
 import com.seimos.android.dbhelper.persistence.DatabaseHelper;
@@ -58,7 +58,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 						}
 					} else {
 						whereBuilder.append(filter.getWhere());
-						String[] args = filter.getValue();
+						String[] args = filter.getValues();
 
 						if (args != null && args.length > 0) {
 							for (String arg : args) {
@@ -127,7 +127,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 	@SuppressWarnings("unchecked")
 	public Entity retrieve(Object id) {
 		if (Reflection.getIdField(entityClass) == null) {
-			throw new IllegalArgumentException(entityClass.getCanonicalName() + " must have annotated id with @Id");
+			throw new IllegalArgumentException(entityClass.getCanonicalName() + " must have id field annotated with @Id");
 		}
 		SQLiteDatabase connection = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
@@ -172,6 +172,12 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 		return filter();
 	}
 
+	public List<Entity> filter(List<Filter> filtersList) {
+		Filter[] filters = new Filter[filtersList.size()];
+		filtersList.toArray(filters);
+		return filter(filters);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<Entity> filter(Filter... filters) {
 		SQLiteDatabase connection = null;
@@ -182,6 +188,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			try {
 				FilterManager filterManager = new FilterManager(filters);
 				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null, filterManager.getOrderBy());
+				Log.d(Application.getName(context), Reflection.getValue(cursor, "mQuery").toString());
 				list = entityHandler.extract(cursor);
 			} catch (Exception e) {
 				Log.e(Application.getName(context), "Error in filter");
@@ -205,9 +212,18 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			connection = DatabaseHelper.open();
 			ContentValues values = entityHandler.createContentValues(entity);
 			Field idField = Reflection.getIdField(entityClass);
-			Method method = entityClass.getMethod(Reflection.getGetter(idField));
-			int affectedRows = connection.update(entityHandler.getTableName(), values, "id = ?", new String[] { method.invoke(entity).toString() });
+			if (idField == null) {
+				throw new IllegalArgumentException(entityClass.getCanonicalName() + " must have id field annotated with @Id");
+			}
+			Object whereArg = Reflection.getValue(entity, idField.getName());
+			if (whereArg == null) {
+				throw new NoIdentifierSetted("The identifier must be setted. Try use filter(Filter... filter) instead");
+			}
+			String stringValue = Reflection.getStringValue(entityClass, idField.getName(), whereArg);
+			int affectedRows = connection.update(entityHandler.getTableName(), values, idField.getName() + " = ?", new String[] { stringValue });
 			return affectedRows != 0;
+		} catch (NoIdentifierSetted e) {
+			throw e;
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while updating " + entityClass.getSimpleName());
 			return false;

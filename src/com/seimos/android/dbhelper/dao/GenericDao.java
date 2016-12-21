@@ -15,6 +15,8 @@ public interface GenericDao<Entity extends com.seimos.android.dbhelper.persisten
 
 	List<Entity> list();
 
+	List<Entity> filter(List<Filter> filtersList);
+	
 	List<Entity> filter(Filter... filters);
 
 	boolean update(Entity entity);

@@ -1,5 +1,7 @@
 package com.seimos.android.dbhelper.persistence;
 
+import com.seimos.android.dbhelper.exception.InvalidNumberOfArguments;
+
 /**
  * @author moesio @ gmail.com
  * @date Aug 3, 2015 7:16:38 PM
@@ -8,16 +10,27 @@ public class Filter {
 
 	private String column;
 	private Restriction restriction;
-	private String[] value;
+	private String[] values;
 	private OrderBy orderBy;
 
-	public Filter(String column, Restriction restriction, String... value) {
+	public Filter(String column, Restriction restriction, String... values) {
+		if (column == null || restriction == null) {
+			throw new IllegalArgumentException("Neither column nor restriction can not be null");
+		}
+		String expression = restriction.getExpression();
+		if ((expression.contains("?") && !restriction.equals(Restriction.IN) && !restriction.equals(Restriction.NOTIN) && (values == null || expression.split("\\?").length != values.length)) //
+				|| (!expression.contains("?") && (values != null && values.length != 0))) {
+			throw new InvalidNumberOfArguments("Number of arguments does not match to " + restriction.toString());
+		}
 		this.column = column;
-		this.value = value;
+		this.values = values;
 		this.restriction = restriction;
 	}
 
 	public Filter(String column, OrderBy orderBy) {
+		if (column == null || restriction == null) {
+			throw new IllegalArgumentException("Neither column nor restriction can not be null");
+		}
 		this.column = column;
 		this.orderBy = orderBy;
 	}
@@ -26,12 +39,31 @@ public class Filter {
 		return column;
 	}
 
-	public String[] getValue() {
-		return value;
+	public String[] getValues() {
+		return values;
 	}
 
 	public String getWhere() {
-		return new StringBuilder(getColumn()).append(restriction.getExpression()).toString();
+		String expression = restriction.getExpression();
+		switch (restriction) {
+		case IN:
+			for (int i = 1; i < values.length; i++) {
+				expression = expression.replaceAll("\\?\\)", "\\?, \\?\\)");
+			}
+			break;
+		case EQPROPERTY:
+		case NEPROPERTY:
+		case LTPROPERTY:
+		case LEPROPERTY:
+		case GTPROPERTY:
+		case GEPROPERTY:
+			expression = expression.replaceAll("\\?", values[0]);
+			values = null;
+			break;
+		default:
+			break;
+		}
+		return new StringBuilder(getColumn()).append(expression).toString();
 	}
 
 	public OrderBy getOrderBy() {

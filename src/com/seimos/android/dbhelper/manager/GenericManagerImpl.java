@@ -31,7 +31,10 @@ public abstract class GenericManagerImpl<Entity extends BaseEntity, Dao extends 
 		return getDao().list();
 	}
 
-	@Override
+	public List<Entity> filter(List<Filter> filtersList) {
+		return getDao().filter(filtersList);
+	}
+
 	public List<Entity> filter(Filter... filters) {
 		return getDao().filter(filters);
 	}
