@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.criterion;
+package com.seimos.android.dbhelper.persistence;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

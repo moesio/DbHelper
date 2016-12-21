@@ -14,11 +14,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
-import com.seimos.android.dbhelper.criterion.DatabaseHelper;
-import com.seimos.android.dbhelper.criterion.EntityHandler;
-import com.seimos.android.dbhelper.criterion.Filter;
 import com.seimos.android.dbhelper.exception.NonUniqueResultException;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
+import com.seimos.android.dbhelper.persistence.DatabaseHelper;
+import com.seimos.android.dbhelper.persistence.EntityHandler;
+import com.seimos.android.dbhelper.persistence.Filter;
 import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 

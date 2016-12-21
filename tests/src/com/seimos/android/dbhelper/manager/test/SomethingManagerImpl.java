@@ -2,11 +2,11 @@ package com.seimos.android.dbhelper.manager.test;
 
 import android.content.Context;
 
-import com.seimos.android.dbhelper.criterion.test.Something;
 import com.seimos.android.dbhelper.dao.GenericDao;
 import com.seimos.android.dbhelper.dao.test.SomethingDao;
 import com.seimos.android.dbhelper.dao.test.SomethingDaoImpl;
 import com.seimos.android.dbhelper.manager.GenericManagerImpl;
+import com.seimos.android.dbhelper.persistence.test.Something;
 
 /**
  * @author moesio @ gmail.com

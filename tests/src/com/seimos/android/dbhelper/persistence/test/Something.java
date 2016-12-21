@@ -1,8 +1,8 @@
-package com.seimos.android.dbhelper.criterion.test;
+package com.seimos.android.dbhelper.persistence.test;
 
 import java.util.Date;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
 import com.seimos.android.dbhelper.persistence.TemporalType;

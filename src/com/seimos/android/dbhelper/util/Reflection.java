@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
 import com.seimos.android.dbhelper.exception.ReflectionException;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
 import com.seimos.android.dbhelper.persistence.Transient;

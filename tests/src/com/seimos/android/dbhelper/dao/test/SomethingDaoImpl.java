@@ -2,8 +2,8 @@ package com.seimos.android.dbhelper.dao.test;
 
 import android.content.Context;
 
-import com.seimos.android.dbhelper.criterion.test.Something;
 import com.seimos.android.dbhelper.dao.GenericDaoImpl;
+import com.seimos.android.dbhelper.persistence.test.Something;
 
 /**
  * @author moesio @ gmail.com

@@ -2,7 +2,7 @@ package com.seimos.android.dbhelper.exception;
 
 import java.lang.reflect.Field;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
 
 /**
  * Thrown when a invalid modifier of an entity is used

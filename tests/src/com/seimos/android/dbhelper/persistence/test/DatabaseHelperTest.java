@@ -1,11 +1,11 @@
-package com.seimos.android.dbhelper.criterion.test;
+package com.seimos.android.dbhelper.persistence.test;
 
 import org.junit.Test;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.criterion.DatabaseHelper;
+import com.seimos.android.dbhelper.persistence.DatabaseHelper;
 
 /**
  * @author moesio @ gmail.com

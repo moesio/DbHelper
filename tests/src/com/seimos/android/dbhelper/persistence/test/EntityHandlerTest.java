@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.criterion.test;
+package com.seimos.android.dbhelper.persistence.test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -14,10 +14,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
-import com.seimos.android.dbhelper.criterion.DatabaseHelper;
-import com.seimos.android.dbhelper.criterion.EntityHandler;
 import com.seimos.android.dbhelper.exception.InvalidModifierException;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
+import com.seimos.android.dbhelper.persistence.DatabaseHelper;
+import com.seimos.android.dbhelper.persistence.EntityHandler;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**

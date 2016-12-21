@@ -2,7 +2,7 @@ package com.seimos.android.dbhelper.manager;
 
 import java.util.List;
 
-import com.seimos.android.dbhelper.criterion.Filter;
+import com.seimos.android.dbhelper.persistence.Filter;
 
 /**
  * @author moesio @ gmail.com

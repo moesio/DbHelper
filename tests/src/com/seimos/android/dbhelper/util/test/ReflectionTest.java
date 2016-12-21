@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
-import com.seimos.android.dbhelper.criterion.test.Something;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
 import com.seimos.android.dbhelper.persistence.Id;
+import com.seimos.android.dbhelper.persistence.test.Something;
 import com.seimos.android.dbhelper.util.Reflection;
 
 /**

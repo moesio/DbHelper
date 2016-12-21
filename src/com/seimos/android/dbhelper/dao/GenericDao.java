@@ -2,13 +2,13 @@ package com.seimos.android.dbhelper.dao;
 
 import java.util.List;
 
-import com.seimos.android.dbhelper.criterion.Filter;
+import com.seimos.android.dbhelper.persistence.Filter;
 
 /**
  * @author moesio @ gmail.com
  * @date Jul 28, 2015 5:43:47 PM
  */
-public interface GenericDao<Entity extends com.seimos.android.dbhelper.criterion.BaseEntity> {
+public interface GenericDao<Entity extends com.seimos.android.dbhelper.persistence.BaseEntity> {
 	boolean create(Entity entity);
 
 	Entity retrieve(Object id);

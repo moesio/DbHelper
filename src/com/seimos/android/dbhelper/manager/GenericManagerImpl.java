@@ -4,9 +4,9 @@ import java.util.List;
 
 import android.content.Context;
 
-import com.seimos.android.dbhelper.criterion.BaseEntity;
-import com.seimos.android.dbhelper.criterion.Filter;
 import com.seimos.android.dbhelper.dao.GenericDao;
+import com.seimos.android.dbhelper.persistence.BaseEntity;
+import com.seimos.android.dbhelper.persistence.Filter;
 
 /**
  * @author moesio @ gmail.com

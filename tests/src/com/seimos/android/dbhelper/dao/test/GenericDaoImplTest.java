@@ -8,10 +8,10 @@ import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
-import com.seimos.android.dbhelper.criterion.DatabaseHelper;
-import com.seimos.android.dbhelper.criterion.Filter;
-import com.seimos.android.dbhelper.criterion.Restriction;
-import com.seimos.android.dbhelper.criterion.test.Something;
+import com.seimos.android.dbhelper.persistence.DatabaseHelper;
+import com.seimos.android.dbhelper.persistence.Filter;
+import com.seimos.android.dbhelper.persistence.Restriction;
+import com.seimos.android.dbhelper.persistence.test.Something;
 
 /**
  * @author moesio @ gmail.com

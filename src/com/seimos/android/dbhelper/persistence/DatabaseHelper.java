@@ -1,4 +1,4 @@
-package com.seimos.android.dbhelper.criterion;
+package com.seimos.android.dbhelper.persistence;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
