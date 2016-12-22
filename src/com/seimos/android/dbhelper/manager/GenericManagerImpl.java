@@ -19,7 +19,7 @@ public abstract class GenericManagerImpl<Entity extends BaseEntity, Dao extends 
 	public GenericManagerImpl(Context context) {
 	}
 
-	public boolean create(Entity entity) {
+	public long create(Entity entity) {
 		return getDao().create(entity);
 	}
 

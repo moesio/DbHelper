@@ -9,7 +9,7 @@ import com.seimos.android.dbhelper.persistence.Filter;
  * @date Jul 28, 2015 5:43:47 PM
  */
 public interface GenericDao<Entity extends com.seimos.android.dbhelper.persistence.BaseEntity> {
-	boolean create(Entity entity);
+	long create(Entity entity);
 
 	Entity retrieve(Object id);
 

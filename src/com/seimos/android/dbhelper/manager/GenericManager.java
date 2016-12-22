@@ -9,7 +9,7 @@ import com.seimos.android.dbhelper.persistence.Filter;
  * @date Jul 28, 2015 5:39:36 PM
  */
 public interface GenericManager<Entity> {
-	boolean create(Entity entity);
+	long create(Entity entity);
 
 	Entity retrieve(Object id);
 

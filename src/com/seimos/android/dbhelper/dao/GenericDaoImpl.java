@@ -106,9 +106,9 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 		this.entityHandler = new EntityHandler(context, entityClass);
 	}
 
-	public boolean create(Entity entity) {
+	public long create(Entity entity) {
 		SQLiteDatabase connection = null;
-		long id = 0;
+		long id = -1;
 		try {
 			connection = DatabaseHelper.open();
 			ContentValues values = entityHandler.createContentValues(entity);
@@ -121,7 +121,7 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 				connection.close();
 			}
 		}
-		return id > 0;
+		return id;
 	}
 
 	@SuppressWarnings("unchecked")

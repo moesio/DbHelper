@@ -35,7 +35,7 @@ public class GenericDaoImplTest extends AndroidTestCase {
 
 	@Test
 	public final void testCreate() {
-		assertTrue(dao.create(something));
+		assertTrue(dao.create(something) > 0);
 		try {
 			dao.create(null);
 			fail("Must not accept null as argument for create");
