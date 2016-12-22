@@ -15,6 +15,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.seimos.android.dbhelper.exception.ReflectionException;
 import com.seimos.android.dbhelper.util.Application;
 import com.seimos.android.dbhelper.util.Reflection;
 
@@ -76,6 +77,8 @@ public class EntityHandler {
 					contentValues.put(databaseFieldName, (Double) value);
 				} else if (field.getType() == Long.class) {
 					contentValues.put(databaseFieldName, (Long) value);
+				} else if (field.getType() == Enum.class) {
+					contentValues.put(databaseFieldName, Reflection.getStringValue(entity.getClass(), field.getName()));
 				} else {
 					contentValues.put(databaseFieldName, value.toString());
 				}
@@ -86,8 +89,7 @@ public class EntityHandler {
 		return contentValues;
 	}
 
-	public List<BaseEntity> extract(final Cursor cursor) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException,
-			NoSuchMethodException {
+	public List<BaseEntity> extract(final Cursor cursor) {
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
 		if (cursor.moveToFirst()) {
 			do {
@@ -100,64 +102,71 @@ public class EntityHandler {
 		return list;
 	}
 
-	public BaseEntity createEntityFromCursor(final Cursor cursor) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-		BaseEntity entity = entityClass.newInstance();
-		if (cursor.getCount() > 0) {
-			String[] columnNames = cursor.getColumnNames();
-			for (String columnName : columnNames) {
-				try {
-					Field field = entityClass.getDeclaredField(columnName);
-					Class<?> type = field.getType();
+	public BaseEntity createEntityFromCursor(final Cursor cursor) {
+		BaseEntity entity;
+		try {
+			entity = entityClass.newInstance();
+			if (cursor.getCount() > 0) {
+				String[] columnNames = cursor.getColumnNames();
+				for (String columnName : columnNames) {
+					try {
+						Field field = entityClass.getDeclaredField(columnName);
+						Class<?> type = field.getType();
 
-					Object value = null;
-					if (type == Boolean.class) {
-						value = cursor.getInt(cursor.getColumnIndex(columnName)) == 1 ? true : false;
-					} else if (type == Integer.class) {
-						value = cursor.getInt(cursor.getColumnIndex(columnName));
-					} else if (type == String.class) {
-						value = cursor.getString(cursor.getColumnIndex(columnName));
-					} else if (type == Date.class) {
-						String stringValue = cursor.getString(cursor.getColumnIndex(columnName));
-						if (stringValue != null) {
-							try {
-								value = Reflection.getDateFormat(field).parse(stringValue);
-							} catch (ParseException e) {
+						Object value = null;
+						if (type == Boolean.class) {
+							value = cursor.getInt(cursor.getColumnIndex(columnName)) == 1 ? true : false;
+						} else if (type == Integer.class) {
+							value = cursor.getInt(cursor.getColumnIndex(columnName));
+						} else if (type == String.class) {
+							value = cursor.getString(cursor.getColumnIndex(columnName));
+						} else if (type == Date.class) {
+							String stringValue = cursor.getString(cursor.getColumnIndex(columnName));
+							if (stringValue != null) {
+								try {
+									value = Reflection.getDateFormat(field).parse(stringValue);
+								} catch (ParseException e) {
+									Log.d(Application.getName(context), "Invalid date format for " + columnName);
+								}
 							}
+						} else if (type == Double.class) {
+							value = cursor.getDouble(cursor.getColumnIndex(columnName));
+						} else if (type == Long.class) {
+							value = cursor.getLong(cursor.getColumnIndex(columnName));
+						} else {
+							// TODO Test deep associations more than one level, ie, nested association
+
+							BaseEntity association = (BaseEntity) type.newInstance();
+							Method methodAssociation = association.getClass().getMethod(Reflection.getSetter(Reflection.getIdField(association.getClass()).getName()),
+									Integer.class);
+							// TODO Verify when id field is not an Integer
+							Integer idValue = cursor.getInt(cursor.getColumnIndex(columnName));
+							methodAssociation.invoke(association, idValue);
+
+							@SuppressWarnings("unchecked")
+							EntityHandler entityHandler = new EntityHandler(context, (Class<? extends BaseEntity>) field.getType());
+							SQLiteDatabase database = DatabaseHelper.open();
+							String idFieldName = Reflection.getIdField(field.getType()).getName();
+							// TODO Verify when id field is not an Integer
+							Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?",
+									new String[] { idValue.toString() }, null, null, idFieldName, "1");
+							if (cursorAssociation.moveToFirst()) {
+								association = entityHandler.createEntityFromCursor(cursorAssociation);
+							}
+							database.close();
+
+							value = association;
 						}
-					} else if (type == Double.class) {
-						value = cursor.getDouble(cursor.getColumnIndex(columnName));
-					} else if (type == Long.class) {
-						value = cursor.getLong(cursor.getColumnIndex(columnName));
-					} else {
-						// TODO Test deep associations more than one level, ie, nested association
-
-						BaseEntity association = (BaseEntity) type.newInstance();
-						Method methodAssociation = association.getClass().getMethod(Reflection.getSetter(Reflection.getIdField(association.getClass()).getName()), Integer.class);
-						// TODO Verify when id field is not an Integer
-						Integer idValue = cursor.getInt(cursor.getColumnIndex(columnName));
-						methodAssociation.invoke(association, idValue);
-
-						@SuppressWarnings("unchecked")
-						EntityHandler entityHandler = new EntityHandler(context, (Class<? extends BaseEntity>) field.getType());
-						SQLiteDatabase database = DatabaseHelper.open();
-						String idFieldName = Reflection.getIdField(field.getType()).getName();
-						// TODO Verify when id field is not an Integer
-						Cursor cursorAssociation = database.query(entityHandler.getTableName(), entityHandler.getColumns(), idFieldName + " = ?",
-								new String[] { idValue.toString() }, null, null, idFieldName, "1");
-						if (cursorAssociation.moveToFirst()) {
-							association = entityHandler.createEntityFromCursor(cursorAssociation);
+						if (value != null) {
+							Reflection.setValue(entity, columnName, value);
 						}
-						database.close();
-
-						value = association;
+					} catch (NoSuchFieldException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException e) {
+						Log.d(Application.getName(context), "There is no " + columnName + " field for " + entityClass.getCanonicalName());
 					}
-					if (value != null) {
-						Reflection.setValue(entity, columnName, value);
-					}
-				} catch (NoSuchFieldException e) {
-					Log.d(Application.getName(context), "There is no " + columnName + " field for " + entityClass.getCanonicalName());
 				}
 			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new ReflectionException(e);
 		}
 		return entity;
 	}

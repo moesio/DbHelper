@@ -9,6 +9,8 @@ import org.junit.Test;
 import android.test.AndroidTestCase;
 
 import com.seimos.android.dbhelper.persistence.BaseEntity;
+import com.seimos.android.dbhelper.persistence.EnumType;
+import com.seimos.android.dbhelper.persistence.Enumerated;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.test.Something;
 import com.seimos.android.dbhelper.util.Reflection;
@@ -20,6 +22,10 @@ import com.seimos.android.dbhelper.util.Reflection;
 public class ReflectionTest extends AndroidTestCase {
 
 	private Something something;
+
+	public enum Any {
+		ONE, TWO, THREE;
+	}
 
 	@Override
 	protected void setUp() throws Exception {
@@ -88,17 +94,54 @@ public class ReflectionTest extends AndroidTestCase {
 		assertEquals(1L, Reflection.getValue(something, "id"));
 		assertEquals(2, Reflection.getValue(something, "aInteger"));
 		assertEquals("Foo", Reflection.getValue(something, "name"));
+
+		BaseEntity any = new BaseEntity() {
+
+			@Enumerated(EnumType.STRING)
+			private Any any;
+
+			@SuppressWarnings("unused")
+			public Any getAny() {
+				return any;
+			}
+
+			@Override
+			public String toString() {
+				return "anything with enum field";
+			}
+		};
+		Reflection.setValue(any, "any", Any.ONE);
+		Object value = Reflection.getValue(any, "any");
+		assertEquals(Any.ONE, value);
+		assertEquals("ONE", Reflection.getStringValue(any, "any"));
+
+		class Foo {
+			@Enumerated
+			Any any;
+		}
+		Foo foo = new Foo();
+		Reflection.setValue(foo, "any", Any.ONE);
+		assertEquals("0", Reflection.getStringValue(foo, "any"));
+
+		class Bar {
+			@SuppressWarnings("unused")
+			Any any;
+		}
+		Bar bar = new Bar();
+		Reflection.setValue(bar, "any", Any.THREE);
+		assertEquals("THREE", Reflection.getStringValue(bar, "any"));
 	}
 
 	@Test
 	public final void testGetIdField() {
+
 		BaseEntity baseEntity = new BaseEntity() {
+
 			@Id
 			private Integer id;
 
 			@Override
 			public String toString() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};
@@ -139,6 +182,31 @@ public class ReflectionTest extends AndroidTestCase {
 		Foo foo = new Foo();
 		Reflection.setValue(foo, "bar", "bar");
 		assertEquals("bar", foo.getBar());
+
+		class Anything {
+
+			@Enumerated
+			Any any;
+		}
+
+		Anything anything = new Anything();
+		Reflection.setValue(anything, "any", Any.ONE);
+		assertEquals(Any.ONE, anything.any);
+
+		class Else extends Anything {
+			public Any getAny() {
+				return any;
+			}
+
+			@SuppressWarnings("unused")
+			public void setAny(Any any) {
+				this.any = any;
+			}
+		}
+
+		Else els = new Else();
+		Reflection.setValue(els, "any", Any.TWO);
+		assertEquals(Any.TWO, els.getAny());
 	}
 
 	@Test

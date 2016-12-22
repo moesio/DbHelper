@@ -177,24 +177,19 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 		filtersList.toArray(filters);
 		return filter(filters);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<Entity> filter(Filter... filters) {
 		SQLiteDatabase connection = null;
 		List<BaseEntity> list = new ArrayList<BaseEntity>();
+		connection = DatabaseHelper.open();
+		Cursor cursor;
+		FilterManager filterManager = new FilterManager(filters);
+		cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null,
+				filterManager.getOrderBy());
+		//				Log.d(Application.getName(context), Reflection.getValue(cursor, "mQuery").toString());
+		list = entityHandler.extract(cursor);
 		try {
-			connection = DatabaseHelper.open();
-			Cursor cursor;
-			try {
-				FilterManager filterManager = new FilterManager(filters);
-				cursor = connection.query(entityHandler.getTableName(), entityHandler.getColumns(), filterManager.getWhere(), filterManager.getArgs(), null, null, filterManager.getOrderBy());
-				Log.d(Application.getName(context), Reflection.getValue(cursor, "mQuery").toString());
-				list = entityHandler.extract(cursor);
-			} catch (Exception e) {
-				Log.e(Application.getName(context), "Error in filter");
-				Log.e(Application.getName(context), e.getMessage());
-				Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-			}
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while filtering " + entityClass.getSimpleName());
 			throw e;
@@ -219,13 +214,14 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 			if (whereArg == null) {
 				throw new NoIdentifierSetted("The identifier must be setted. Try use filter(Filter... filter) instead");
 			}
-			String stringValue = Reflection.getStringValue(entityClass, idField.getName(), whereArg);
+			String stringValue = Reflection.getStringValue(entity, idField.getName());
 			int affectedRows = connection.update(entityHandler.getTableName(), values, idField.getName() + " = ?", new String[] { stringValue });
 			return affectedRows != 0;
 		} catch (NoIdentifierSetted e) {
 			throw e;
 		} catch (Exception e) {
 			Log.e(Application.getName(context), "Error while updating " + entityClass.getSimpleName());
+			Log.e(Application.getName(context), e.getLocalizedMessage());
 			return false;
 		} finally {
 			if (connection != null) {

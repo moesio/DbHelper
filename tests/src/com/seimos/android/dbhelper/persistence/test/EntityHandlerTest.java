@@ -105,11 +105,7 @@ public class EntityHandlerTest extends AndroidTestCase {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
 		db.execSQL("insert into extract values ('John Doe', 'true', 1000)");
 		Cursor cursor = db.query("extract", new String[] { "name", "flag", "value" }, null, null, null, null, null);
-		try {
-			entityHandler.extract(cursor).size();
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
-		}
-
+		entityHandler.extract(cursor).size();
 	}
 
 	@Test
@@ -130,10 +126,7 @@ public class EntityHandlerTest extends AndroidTestCase {
 		something.setName("Foo");
 		ContentValues expectedContentValues = new ContentValues();
 		expectedContentValues.put("aBoolean", true);
-		try {
-			expectedContentValues.put("aDate", Reflection.getStringValue(Something.class, "aDate", now));
-		} catch (NoSuchFieldException e1) {
-		}
+		expectedContentValues.put("aDate", Reflection.getStringValue(something, "aDate"));
 		expectedContentValues.put("aDouble", 2.);
 		expectedContentValues.put("id", 1L);
 		expectedContentValues.put("aInteger", 2);

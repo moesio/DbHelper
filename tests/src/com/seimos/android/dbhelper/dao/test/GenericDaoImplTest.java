@@ -86,9 +86,11 @@ public class GenericDaoImplTest extends AndroidTestCase {
 		assertEquals("Nine", result.get(4).getName());
 
 		filters = new ArrayList<Filter>();
-		filters.add(new Filter("id", Restriction.IN));
-		result = dao.filter(filters);
-		assertEquals(0, result.size());
+		try {
+			filters.add(new Filter("id", Restriction.IN));
+			fail("Must no accept empty values for Restriction.IN");
+		} catch (InvalidNumberOfArguments e) {
+		}
 
 		filters = new ArrayList<Filter>();
 		filters.add(new Filter("name", Restriction.LIKE, "T%"));

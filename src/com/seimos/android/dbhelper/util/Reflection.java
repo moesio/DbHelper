@@ -11,6 +11,8 @@ import java.util.Locale;
 
 import com.seimos.android.dbhelper.exception.ReflectionException;
 import com.seimos.android.dbhelper.persistence.BaseEntity;
+import com.seimos.android.dbhelper.persistence.EnumType;
+import com.seimos.android.dbhelper.persistence.Enumerated;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
 import com.seimos.android.dbhelper.persistence.Transient;
@@ -61,19 +63,46 @@ public class Reflection {
 		Class<?> clazz = object.getClass();
 		Object invocation = null;
 		Method method;
+		Field field = null;
 		try {
+			field = clazz.getDeclaredField(property);
 			method = clazz.getMethod(Reflection.getGetter(property));
 			invocation = method.invoke(object);
 		} catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			field.setAccessible(true);
 			try {
-				Field field = object.getClass().getDeclaredField(property);
-				field.setAccessible(true);
 				invocation = field.get(object);
-			} catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e1) {
-				throw new ReflectionException(property + " not accessible on " + object.getClass().getName());
+			} catch (IllegalAccessException | IllegalArgumentException e1) {
+				throw new ReflectionException(e);
 			}
+		} catch (NoSuchFieldException e1) {
+			throw new ReflectionException("\"" + property + "\" not exists in " + clazz.getName());
 		}
+
 		return invocation;
+	}
+
+	public static <Entity extends BaseEntity> String getStringValue(Object object, String property) {
+		Object value = getValue(object, property);
+		Field field;
+		try {
+			field = object.getClass().getDeclaredField(property);
+		} catch (NoSuchFieldException e) {
+			throw new ReflectionException("\"" + property + "\" not exists in " + object.getClass().getName());
+		}
+		if (value != null) {
+			String result;
+			if (value.getClass() == Date.class) {
+				result = Reflection.getDateFormat(field).format(value);
+			} else if (value.getClass().isEnum()) {
+				result = getEnumValue(field, (Enum<?>) value);
+			} else {
+				result = value.toString();
+			}
+			return result;
+		} else {
+			return "";
+		}
 	}
 
 	//	private static boolean isCollection(Class<?> clazz, String attributePath) {
@@ -113,7 +142,8 @@ public class Reflection {
 		Field field;
 		for (int i = 0; i < fields.length; i++) {
 			field = fields[i];
-			if ((clazz.getEnclosingClass() != null && field.getType().equals(clazz.getEnclosingClass())) || Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) || field.isAnnotationPresent(Transient.class)) {
+			if ((clazz.getEnclosingClass() != null && field.getType().equals(clazz.getEnclosingClass())) || Modifier.isFinal(field.getModifiers())
+					|| Modifier.isTransient(field.getModifiers()) || field.isAnnotationPresent(Transient.class)) {
 				continue;
 			}
 			fieldList.add(field);
@@ -140,12 +170,12 @@ public class Reflection {
 
 	}
 
-	public static <Entity extends BaseEntity> String getStringValue(Class<Entity> entityClass, String fieldName, Object value) throws NoSuchFieldException {
-		if (value != null) {
-			return (value.getClass() == Date.class) ? Reflection.getDateFormat(entityClass.getField(fieldName)).format(value) : (value.toString());
-		} else {
-			return "";
+	private static String getEnumValue(Field field, Enum<?> value) {
+		Enumerated annotation = field.getAnnotation(Enumerated.class);
+		if (field.isAnnotationPresent(Enumerated.class) && (annotation.value().equals(EnumType.ORDINAL))) {
+			return Integer.toString(value.ordinal());
 		}
+		return value.toString();
 	}
 
 	public static SimpleDateFormat getDateFormat(Field field) {

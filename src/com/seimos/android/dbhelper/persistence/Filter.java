@@ -18,10 +18,36 @@ public class Filter {
 			throw new IllegalArgumentException("Neither column nor restriction can not be null");
 		}
 		String expression = restriction.getExpression();
-		if ((expression.contains("?") && !restriction.equals(Restriction.IN) && !restriction.equals(Restriction.NOTIN) && (values == null || expression.split("\\?").length != values.length)) //
-				|| (!expression.contains("?") && (values != null && values.length != 0))) {
+		boolean go = false;
+		if (expression.contains("?")) {
+			if (restriction.equals(Restriction.IN) || restriction.equals(Restriction.NOTIN)) {
+				if (values != null) {
+					if (values.length > 0) {
+						go = true;
+					}
+				}
+			} else {
+				if (values != null) {
+					if (expression.split("\\?").length == values.length) {
+						go = true;
+					}
+				}
+			}
+		} else {
+			if (values == null || values.length == 0) {
+				go = true;
+			}
+		}
+
+		if (!go) {
 			throw new InvalidNumberOfArguments("Number of arguments does not match to " + restriction.toString());
 		}
+
+		//		if ((expression.contains("?") && (!restriction.equals(Restriction.IN) && !restriction.equals(Restriction.NOTIN) && (values == null || expression.split("\\?").length != values.length) )//
+		//				|| (restriction.equals(Restriction.IN) || restriction.equals(Restriction.NOTIN)) 
+		//				|| (!expression.contains("?") && (values != null && values.length != 0))) {
+		//			throw new InvalidNumberOfArguments("Number of arguments does not match to " + restriction.toString());
+		//		}
 		this.column = column;
 		this.values = values;
 		this.restriction = restriction;

@@ -10,4 +10,8 @@ public class ReflectionException extends RuntimeException {
 		super(message);
 	}
 
+	public ReflectionException(Exception e) {
+		super(e);
+	}
+
 }
