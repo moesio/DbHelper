@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -114,14 +115,15 @@ public class EntityHandler {
 						Class<?> type = field.getType();
 
 						Object value = null;
+						int columnIndex = cursor.getColumnIndex(columnName);
 						if (type == Boolean.class) {
-							value = cursor.getInt(cursor.getColumnIndex(columnName)) == 1 ? true : false;
+							value = cursor.getInt(columnIndex) == 1 ? true : false;
 						} else if (type == Integer.class) {
-							value = cursor.getInt(cursor.getColumnIndex(columnName));
+							value = cursor.getInt(columnIndex);
 						} else if (type == String.class) {
-							value = cursor.getString(cursor.getColumnIndex(columnName));
+							value = cursor.getString(columnIndex);
 						} else if (type == Date.class) {
-							String stringValue = cursor.getString(cursor.getColumnIndex(columnName));
+							String stringValue = cursor.getString(columnIndex);
 							if (stringValue != null) {
 								try {
 									value = Reflection.getDateFormat(field).parse(stringValue);
@@ -130,9 +132,15 @@ public class EntityHandler {
 								}
 							}
 						} else if (type == Double.class) {
-							value = cursor.getDouble(cursor.getColumnIndex(columnName));
+							value = cursor.getDouble(columnIndex);
 						} else if (type == Long.class) {
-							value = cursor.getLong(cursor.getColumnIndex(columnName));
+							value = cursor.getLong(columnIndex);
+						} else if (type.isEnum()) {
+							if (Reflection.isOrdinalEnumerated(field)) {
+								value = cursor.getInt(columnIndex);
+							} else {
+								value = cursor.getString(columnIndex);
+							}
 						} else {
 							// TODO Test deep associations more than one level, ie, nested association
 
@@ -140,7 +148,7 @@ public class EntityHandler {
 							Method methodAssociation = association.getClass().getMethod(Reflection.getSetter(Reflection.getIdField(association.getClass()).getName()),
 									Integer.class);
 							// TODO Verify when id field is not an Integer
-							Integer idValue = cursor.getInt(cursor.getColumnIndex(columnName));
+							Integer idValue = cursor.getInt(columnIndex);
 							methodAssociation.invoke(association, idValue);
 
 							@SuppressWarnings("unchecked")

@@ -170,12 +170,15 @@ public class Reflection {
 
 	}
 
-	private static String getEnumValue(Field field, Enum<?> value) {
-		Enumerated annotation = field.getAnnotation(Enumerated.class);
-		if (field.isAnnotationPresent(Enumerated.class) && (annotation.value().equals(EnumType.ORDINAL))) {
+	public static String getEnumValue(Field field, Enum<?> value) {
+		if (isOrdinalEnumerated(field)) {
 			return Integer.toString(value.ordinal());
 		}
 		return value.toString();
+	}
+
+	public static boolean isOrdinalEnumerated(Field field) {
+		return field.isAnnotationPresent(Enumerated.class) && (field.getAnnotation(Enumerated.class).value().equals(EnumType.ORDINAL));
 	}
 
 	public static SimpleDateFormat getDateFormat(Field field) {
