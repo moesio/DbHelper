@@ -50,14 +50,12 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 				StringBuilder orderBuilder = new StringBuilder();
 				for (int i = 0; i < filters.length; i++) {
 					Filter filter = filters[i];
-					if (filter.getOrderBy() != null) {
-						orderBuilder.append(filter.getOrderBy().toString());
-
-						if (i < (filters.length - 1)) {
-							orderBuilder.append(", ");
-						}
+					if (filter.getOrder() != null) {
+						orderBuilder.append(filter.getOrder()).append(",");
 					} else {
 						whereBuilder.append(filter.getWhere());
+						whereBuilder.append(" and ");
+
 						String[] args = filter.getValues();
 
 						if (args != null && args.length > 0) {
@@ -66,14 +64,15 @@ public class GenericDaoImpl<Entity extends BaseEntity> implements GenericDao<Ent
 							}
 						}
 
-						if (i < (filters.length - 1)) {
-							whereBuilder.append(" and ");
-						}
 					}
 				}
+				if (orderBuilder.length() > 0) {
+					String string = orderBuilder.toString();
+					this.orderBy = string.substring(0, string.lastIndexOf(","));
+				}
 				if (whereBuilder.length() > 0) {
-					this.where = whereBuilder.toString();
-					this.orderBy = orderBuilder.toString();
+					String string = whereBuilder.toString();
+					this.where = string.substring(0, string.lastIndexOf(" and "));
 				}
 				if (argsBuilder.size() > 0) {
 					args = new String[argsBuilder.size()];

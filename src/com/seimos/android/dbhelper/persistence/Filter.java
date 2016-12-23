@@ -11,7 +11,7 @@ public class Filter {
 	private String column;
 	private Restriction restriction;
 	private String[] values;
-	private OrderBy orderBy;
+	private Order order;
 
 	public Filter(String column, Restriction restriction, String... values) {
 		if (column == null || restriction == null) {
@@ -53,12 +53,12 @@ public class Filter {
 		this.restriction = restriction;
 	}
 
-	public Filter(String column, OrderBy orderBy) {
-		if (column == null || restriction == null) {
+	public Filter(String column, Order order) {
+		if (column == null || order == null) {
 			throw new IllegalArgumentException("Neither column nor restriction can not be null");
 		}
 		this.column = column;
-		this.orderBy = orderBy;
+		this.order = order;
 	}
 
 	public String getColumn() {
@@ -92,8 +92,8 @@ public class Filter {
 		return new StringBuilder(getColumn()).append(expression).toString();
 	}
 
-	public OrderBy getOrderBy() {
-		return this.orderBy;
+	public String getOrder() {
+		return order == null ? null : (column + " " + this.order.toString());
 	}
 
 }

@@ -13,6 +13,7 @@ import com.seimos.android.dbhelper.exception.NoIdentifierSetted;
 import com.seimos.android.dbhelper.persistence.DatabaseHelper;
 import com.seimos.android.dbhelper.persistence.EnumType;
 import com.seimos.android.dbhelper.persistence.Filter;
+import com.seimos.android.dbhelper.persistence.Order;
 import com.seimos.android.dbhelper.persistence.Restriction;
 import com.seimos.android.dbhelper.persistence.test.Something;
 
@@ -80,6 +81,11 @@ public class GenericDaoImplTest extends AndroidTestCase {
 			dao.create(something);
 		}
 		assertEquals(10, dao.list().size());
+		
+		filters = new ArrayList<Filter>();
+		filters.add(new Filter("name", Order.ASC));
+		result = dao.filter(filters);
+		assertEquals("Eight", result.get(0).getName());
 
 		filters = new ArrayList<Filter>();
 		filters.add(new Filter("id", Restriction.IN, "1", "3", "5", "7", "9"));

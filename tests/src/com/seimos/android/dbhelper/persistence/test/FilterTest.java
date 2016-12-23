@@ -1,11 +1,12 @@
 package com.seimos.android.dbhelper.persistence.test;
 
-import org.junit.Test;
+ import org.junit.Test;
 
 import android.test.AndroidTestCase;
 
 import com.seimos.android.dbhelper.exception.InvalidNumberOfArguments;
 import com.seimos.android.dbhelper.persistence.Filter;
+import com.seimos.android.dbhelper.persistence.Order;
 import com.seimos.android.dbhelper.persistence.Restriction;
 
 /**
@@ -20,12 +21,6 @@ public class FilterTest extends AndroidTestCase {
 			new Filter("column", Restriction.BETWEEN);
 			fail("Invalid number of arguments");
 		} catch (InvalidNumberOfArguments e) {
-		}
-
-		try {
-			new Filter(null, null);
-			fail("Arguments must not be null");
-		} catch (IllegalArgumentException e) {
 		}
 
 		try {
@@ -47,14 +42,18 @@ public class FilterTest extends AndroidTestCase {
 
 	}
 
-	//	/**
-	//	 * Test method for {@link com.seimos.android.dbhelper.persistence.Filter#Filter(java.lang.String, com.seimos.android.dbhelper.persistence.OrderBy)}.
-	//	 */
-	//	@Test
-	//	public final void testFilterStringOrderBy() {
-	//		fail("Not yet implemented"); // TODO
-	//	}
-	//
+	@Test
+	public final void testFilterStringOrderBy() {
+		try {
+			new Filter(null, null);
+			fail("Arguments must not be null");
+		} catch (IllegalArgumentException e) {
+		}
+
+		Filter filter = new Filter("column", Order.ASC);
+		assertEquals("column ASC", filter.getOrder());
+	}
+
 	//	/**
 	//	 * Test method for {@link com.seimos.android.dbhelper.persistence.Filter#getColumn()}.
 	//	 */
