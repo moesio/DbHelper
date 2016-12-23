@@ -193,7 +193,11 @@ public class ReflectionTest extends AndroidTestCase {
 		Reflection.setValue(anything, "any", Any.ONE);
 		assertEquals(Any.ONE, anything.any);
 
-		class Else extends Anything {
+		class Else {
+			
+			@Enumerated
+			Any any;
+			
 			public Any getAny() {
 				return any;
 			}

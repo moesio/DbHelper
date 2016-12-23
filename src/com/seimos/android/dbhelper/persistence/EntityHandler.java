@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.EnumSet;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -137,9 +137,25 @@ public class EntityHandler {
 							value = cursor.getLong(columnIndex);
 						} else if (type.isEnum()) {
 							if (Reflection.isOrdinalEnumerated(field)) {
-								value = cursor.getInt(columnIndex);
+								int enumIntValue = cursor.getInt(columnIndex);
+								@SuppressWarnings({ "rawtypes", "unchecked" })
+								Class<Enum> enumType = (Class<Enum>) field.getType();
+								@SuppressWarnings({ "rawtypes", "unchecked" })
+								EnumSet allOf = EnumSet.allOf(enumType);
+								Object[] array = allOf.toArray();
+								for (Object object : array) {
+									if (enumType.cast(object).ordinal() == enumIntValue) {
+										value = object;
+										break;
+									}
+								}
 							} else {
-								value = cursor.getString(columnIndex);
+								String enumStrValue = cursor.getString(columnIndex);
+								if (enumStrValue != null) {
+									@SuppressWarnings({ "rawtypes", "unchecked" })
+									Class<Enum> enumType = (Class<Enum>) field.getType();
+									value = Enum.valueOf(enumType, enumStrValue);
+								}
 							}
 						} else {
 							// TODO Test deep associations more than one level, ie, nested association
@@ -165,6 +181,7 @@ public class EntityHandler {
 
 							value = association;
 						}
+
 						if (value != null) {
 							Reflection.setValue(entity, columnName, value);
 						}

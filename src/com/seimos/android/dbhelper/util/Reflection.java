@@ -154,20 +154,21 @@ public class Reflection {
 
 	public static void setValue(Object object, String columnName, Object value) {
 		Class<? extends Object> clazz = object.getClass();
+		Field field = null;
 		try {
+			field = clazz.getDeclaredField(columnName);
 			Method method = clazz.getMethod(getSetter(columnName), value.getClass());
 			method.invoke(object, value);
+		} catch (NoSuchFieldException e) {
+			throw new IllegalArgumentException("Cannot set value to field \"" + columnName + "\" in class " + clazz);
 		} catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			Field field;
+			field.setAccessible(true);
 			try {
-				field = clazz.getDeclaredField(columnName);
-				field.setAccessible(true);
 				field.set(object, value);
-			} catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e1) {
-				throw new IllegalArgumentException("Cannot set value to field " + columnName + " in class " + clazz);
+			} catch (IllegalAccessException | IllegalArgumentException e1) {
+				throw new ReflectionException(e1);
 			}
 		}
-
 	}
 
 	public static String getEnumValue(Field field, Enum<?> value) {

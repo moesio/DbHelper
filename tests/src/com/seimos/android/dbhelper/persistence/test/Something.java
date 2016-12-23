@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.seimos.android.dbhelper.persistence.BaseEntity;
 import com.seimos.android.dbhelper.persistence.EnumType;
+import com.seimos.android.dbhelper.persistence.Enumerated;
 import com.seimos.android.dbhelper.persistence.Id;
 import com.seimos.android.dbhelper.persistence.Temporal;
 import com.seimos.android.dbhelper.persistence.TemporalType;
@@ -14,12 +15,14 @@ import com.seimos.android.dbhelper.persistence.TemporalType;
  */
 public class Something extends BaseEntity {
 
-	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, type text, aInteger INTEGER, aBoolean BOOLEAN, aDate TIMESTAMP, dateOnly TIMESTAMP, timeOnly TIMESTAMP, fullDateTime TIMESTAMP, aDouble REAL)" };
-	public static final String[] COLUMNS = new String[] { "id", "name", "type", "aInteger", "aBoolean", "aDate", "aDouble", "dateOnly", "timeOnly", "fullDateTime" };
+	public static final String[] TABLE_CREATION_QUERY = new String[] { "CREATE TABLE something (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, type text, typeOrdinal integer, aInteger INTEGER, aBoolean BOOLEAN, aDate TIMESTAMP, dateOnly TIMESTAMP, timeOnly TIMESTAMP, fullDateTime TIMESTAMP, aDouble REAL)" };
+	public static final String[] COLUMNS = new String[] { "id", "name", "type", "typeOrdinal", "aInteger", "aBoolean", "aDate", "aDouble", "dateOnly", "timeOnly", "fullDateTime" };
 	@Id
 	Long id;
 	String name;
 	EnumType type;
+	@Enumerated(EnumType.ORDINAL)
+	EnumType typeOrdinal;
 	Integer aInteger;
 	Boolean aBoolean;
 	Date aDate;
@@ -51,6 +54,15 @@ public class Something extends BaseEntity {
 
 	public Something setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public EnumType getType() {
+		return type;
+	}
+
+	public Something setType(EnumType type) {
+		this.type = type;
 		return this;
 	}
 

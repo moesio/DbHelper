@@ -11,6 +11,7 @@ import android.test.AndroidTestCase;
 import com.seimos.android.dbhelper.exception.InvalidNumberOfArguments;
 import com.seimos.android.dbhelper.exception.NoIdentifierSetted;
 import com.seimos.android.dbhelper.persistence.DatabaseHelper;
+import com.seimos.android.dbhelper.persistence.EnumType;
 import com.seimos.android.dbhelper.persistence.Filter;
 import com.seimos.android.dbhelper.persistence.Restriction;
 import com.seimos.android.dbhelper.persistence.test.Something;
@@ -41,6 +42,10 @@ public class GenericDaoImplTest extends AndroidTestCase {
 			fail("Must not accept null as argument for create");
 		} catch (IllegalArgumentException e) {
 		}
+		
+		something.setType(EnumType.ORDINAL);
+		long id = dao.create(something);
+		assertEquals(EnumType.ORDINAL, dao.retrieve(id).getType());
 	}
 
 	@Test
